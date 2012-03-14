@@ -67,7 +67,7 @@ function _webform_calculator_compute_formula_components($webform, &$submission) 
     $value = str_replace(array_keys($name_val), array_values($name_val), $formula['value']);
     module_load_include('php', 'webform_calculator', 'evalmath.class');
     $m = new EvalMath();
-    $submission->data[$formula['cid']]['value'][0] = $m->evaluate($value);
+    $submission->data[$formula['cid']]['value'][0] = round($m->evaluate($value), 2);
   }
 }
 
@@ -159,7 +159,6 @@ function webform_calculator_node_view($node, $view_mode) {
     }
   }
 }
-
 
 function webform_calculator_alter_replacements(&$replacements, $data, $options) {
   // Add a div with ID for jeditable.
