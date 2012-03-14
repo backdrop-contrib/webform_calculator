@@ -72,12 +72,12 @@ function _webform_calculator_compute_formula_components($webform, &$submission) 
 }
 
 // TODO add a checkbox on the node form instead "webform fields inline in body?"
-function _should_replace_webform_body_tokens($node) {
-  return strstr($node->body['und'][0]['value'], '[webform:webform-val-');
+function _should_token_replace_webform_body($node) {
+  return !empty($node->body[$node->language]) && strstr($node->body[$node->language][0]['value'], '[webform:webform-val-');
 }
 
 function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
-  if (strstr($form_id, 'webform_client_form_') && _should_replace_webform_body_tokens($form['#node'])) {
+  if (strstr($form_id, 'webform_client_form_') && _should_token_replace_webform_body($form['#node'])) {
     // Decorate our webform & node body for ajax.
     $form['#prefix'] = '<div style="display:none;" id="webform-calculator-form">';
     $form['#suffix'] = '</div>';
@@ -111,7 +111,7 @@ function webform_calculator_ajax_callback(&$form, &$form_state) {
 
 
 function webform_calculator_node_view($node, $view_mode) {
-  if (_should_replace_webform_body_tokens($node)) {
+  if (_should_token_replace_webform_body($node)) {
     $submission = _webform_calculator_recent_submission_or_defaults($node);
     
     // Token-replace the body.
