@@ -1,90 +1,72 @@
 <?php
 /**
  * @file
- *
- * 1) Create a webform with components representing cells & formulas, give them a default  
- * 		value (which will be edited), and a body like the following:
- *   "[webform:webform-val-name] is age [webform:webform-val-age] and an annuity of
- *   $[webform:webform-val-annuity].  His tax savings will be
- *   [webform:webform-val-savings_formula] in [webform:webform-val-years_formula]"
- *
- * 2) Parse those tokens on node_view (see dynamic tokens,
- * token.module[line:552]) to use default values from token, add markup so
- * can be edited inline
- *
- * 3) See editablefields for examples on inline-edit & auto-submit
- * 
- * 4) Create a custom content-type for this "Example Calculation" & add as webform in webform settings
- * 
  */
-
 
 //TODO can put this whole thing in webform_submission_load
 function _webform_calculator_recent_submission_or_defaults($node) {
   global $user;
   module_load_include('inc', 'webform', 'includes/webform.submissions');
-  $submissions = webform_get_submissions( array('nid'=>$node->nid, 'u.uid'=>$user->uid) );
+  $submissions = webform_get_submissions(array('nid' => $node->nid, 'u.uid' => $user->uid));
   
-  if ( !empty($submissions) ) {
+  if (!empty($submissions)) {
     return array_pop($submissions);
   }
   else {
-    $submission = array( 'nid'=>$node->nid, 'sid'=>'defaults' );
+    $submission = array('nid' => $node->nid, 'sid' => 'defaults');
     $submission['data'] = array();
-    foreach($node->webform['components'] as $component) {
+    foreach ($node->webform['components'] as $component) {
       $component['value'] = array($component['value']);
       $submission['data'][$component['cid']] = $component;
     }
-    $submission = (object)$submission;
+    $submission = (object) $submission;
     _webform_calculator_compute_formula_components($node, $submission);
     return $submission;
   }
 }
 
 /**
- * Implements hook_webform_submission_load
+ * Implements hook_webform_submission_load().
  * Respond to the loading of Webform submissions.
  *
- * @param $submissions
+ * @param array $submissions
  *   An array of Webform submissions that are being loaded, keyed by the
  *   submission ID. Modifications to the submissions are done by reference.
  */
 function webform_calculator_webform_submission_load(&$submissions) {
   foreach ($submissions as $sid => $submission) {
-    _webform_calculator_compute_formula_components( node_load($submission->nid), $submission);
+    _webform_calculator_compute_formula_components(node_load($submission->nid), $submission);
   }
 }
 
-/** 
+/**
  * Compute the value of webform formulate components, rather than displaying the equation
  * Note this has to be done in node_load rather than _webform_render_formula() because of order
  */
 function _webform_calculator_compute_formula_components($webform, &$submission) {
-  
-  // Load the webform components' form_keys (not available in $submission), 
+  // Load the webform components' form_keys (not available in $submission),
   $name_val = array();
   $formulas = array();
-  foreach ( $webform->webform['components'] as $c) {
+  foreach ($webform->webform['components'] as $c) {
     // Map those to submitted components
-    $value = $c['value']; //default_value
-    if( $c['type'] == 'formula' ) {
+    $value = $c['value']; // default_value
+    if ($c['type'] == 'formula') {
       $formulas[$c['cid']] = $c;
-      $formulas[$c['cid']]['value'] = $c['value']; 
+      $formulas[$c['cid']]['value'] = $c['value'];
     }
     else {
       $value = $submission->data[$c['cid']]['value'][0];
     }
     $name_val[$c['form_key']] = $value;
   }
-    
-  foreach($formulas as $cid=>$formula) {
+  foreach ($formulas as $cid => $formula) {
     // Filter for safety (unecessary, EvalMath takes care of that for us)
-    //$value = $filter ? _webform_filter_values(check_markup($component['value'], $component['extra']['format'], '', TRUE), NULL, NULL, NULL, FALSE) : $component['value'],
+    //$value = $filter ? _webform_filter_values(check_markup($component['value'], $component['extra']['format'], '', TRUE), NULL, NULL, NULL, FALSE) : $component['value'].
     
-    // Run the math
+    // Run the math.
     $value = str_replace(array_keys($name_val), array_values($name_val), $formula['value']);
     module_load_include('php', 'webform_calculator', 'evalmath.class');
-    $m = new EvalMath;
+    $m = new EvalMath();
     $submission->data[$formula['cid']]['value'][0] = $m->evaluate($value);
   }
 }
@@ -95,20 +77,16 @@ function _should_replace_webform_body_tokens($node) {
 }
 
 function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
-//  $webform_tokens_inline = strstr($form_id, 'webform_client_form_') && strstr($form['#node']->body['und'][0]['value'], '[webform:webform-val-');
-  if(strstr($form_id, 'webform_client_form_') && _should_replace_webform_body_tokens($form['#node'])) {
-    
-    // Decorate our webform & node body for ajax
+  if (strstr($form_id, 'webform_client_form_') && _should_replace_webform_body_tokens($form['#node'])) {
+    // Decorate our webform & node body for ajax.
     $form['#prefix'] = '<div style="display:none;" id="webform-calculator-form">';
     $form['#suffix'] = '</div>';
     $elements = element_children($form['submitted']);
-    foreach($elements as $element) {
-      
+    foreach ($elements as $element) {
       //hide($webform[$element]);
       $form['submitted'][$element]['#prefix'] = "<span id='webform-calculator-input-{$element}'>";
       $form['submitted'][$element]['#suffix'] = '</span>';
     }
-    
     $form['actions']['submit']['#ajax'] = array(
       'callback' => 'webform_calculator_ajax_callback',
       'wrapper' => 'node-' . $form['#node']->nid,
@@ -121,7 +99,7 @@ function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
 }
 
 function webform_calculator_ajax_form_submit(&$form, &$form_state) {
-  //You'll get an error about undefined index without this
+  // You'll get an error about undefined index without this.
   $form_state['rebuild'] = TRUE;
 }
 
@@ -133,40 +111,38 @@ function webform_calculator_ajax_callback(&$form, &$form_state) {
 
 
 function webform_calculator_node_view($node, $view_mode) {
-  
-  if(_should_replace_webform_body_tokens($node)) {
-    
+  if (_should_replace_webform_body_tokens($node)) {
     $submission = _webform_calculator_recent_submission_or_defaults($node);
     
-    // Token-replace the body
-    $data = array('webform'=>$submission);
-    $options = array('callback'=>'webform_calculator_alter_replacements');
+    // Token-replace the body.
+    $data = array('webform' => $submission);
+    $options = array('callback' => 'webform_calculator_alter_replacements');
     $body = &$node->content['body'][0]['#markup'];
     $body = token_replace($body, $data, $options);
     $body = "<div id='webform-calculator-body'>$body</div>";
     
-    // Add previous-submission edit-form to node-body if there is one
-    if( $view_mode == 'full') {
+    // Add previous-submission edit-form to node-body if there is one.
+    if ($view_mode == 'full') {
       // Add inline-edit javascript functionality
-      //TODO add as #attached to webform
-      drupal_add_js(drupal_get_path('module', 'webform_calculator').'/jquery.jeditable.mini.js');
-      drupal_add_js(drupal_get_path('module', 'webform_calculator').'/webform_calculator.js');
+      // TODO add as #attached to webform.
+      drupal_add_js(drupal_get_path('module', 'webform_calculator') . '/jquery.jeditable.mini.js');
+      drupal_add_js(drupal_get_path('module', 'webform_calculator') . '/webform_calculator.js');
       
-      // No submission yet
-      if( $submission->sid == 'defaults' ) {  
+      // No submission yet.
+      if ($submission->sid == 'defaults') {
         // TODO as they inline-edit, save draft.  If they click save, save submission
         // $node->content['webform']['#form']['#is_draft'] = TRUE;
       }
-      // Already has a submission
+      // Already has a submission.
       else {
         // This is node-view on webform.  Replace the default weform with the edit-view
-        // of their previous submission 
+        // of their previous submission.
         $node->content['webform'] = $submission;
       
         $is_draft = FALSE;
         $form = drupal_get_form('webform_client_form_' . $node->nid, $node, $submission, $is_draft);
       
-        //TODO these necessary?  see webform module
+        // TODO these necessary?  see webform module
         $teaser = $view_mode == 'teaser';
         $page = arg(0) == 'node' && arg(1) == $node->nid;
         // Add the output to the node.
@@ -179,7 +155,6 @@ function webform_calculator_node_view($node, $view_mode) {
           '#enabled' => TRUE,
           '#weight' => 10,
         );
-      
       }
     }
   }
@@ -187,19 +162,19 @@ function webform_calculator_node_view($node, $view_mode) {
 
 
 function webform_calculator_alter_replacements(&$replacements, $data, $options) {
-  // Add a div with ID for jeditable
-  foreach($replacements as $id=>$replacement) {
+  // Add a div with ID for jeditable.
+  foreach ($replacements as $id => $replacement) {
     //$html_id = drupal_html_id($id);
     $html_id = str_replace('[webform:webform-val-', '', $id);
     $html_id = str_replace(']', '', $html_id);
     $html_id = "webform-calculator-inline-{$html_id}";
-    //TODO only if :input
+    // TODO only if :input
     $replacements[$id] = "<u><span class='webform-calculator-jeditable' id=\"{$html_id}\">{$replacement}</span></u>";
   }
 }
 
 /**
- * Implementation of hook_webform_component_info()
+ * Implements of hook_webform_component_info().
  */
 function webform_calculator_webform_component_info() {
   $components = array();

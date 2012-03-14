@@ -74,8 +74,6 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
   return $element;
 }
 
-
-
 /**
  * Implements _webform_display_component().
  */
