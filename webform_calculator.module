@@ -89,17 +89,23 @@ function _webform_calculator_compute_formula_components($webform, &$submission) 
   }
 }
 
+// TODO add a checkbox on the node form instead "webform fields inline in body?"
+function _should_replace_webform_body_tokens($node) {
+  return strstr($node->body['und'][0]['value'], '[webform:webform-val-');
+}
+
 function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
-  if( strstr($form_id, 'webform_client_form_') && $form['#node']->type == 'example_calculation') {
+//  $webform_tokens_inline = strstr($form_id, 'webform_client_form_') && strstr($form['#node']->body['und'][0]['value'], '[webform:webform-val-');
+  if(strstr($form_id, 'webform_client_form_') && _should_replace_webform_body_tokens($form['#node'])) {
     
     // Decorate our webform & node body for ajax
-    $form['#prefix'] = '<div style="display:none;" id="sharpe-calc-form">';
+    $form['#prefix'] = '<div style="display:none;" id="webform-calculator-form">';
     $form['#suffix'] = '</div>';
     $elements = element_children($form['submitted']);
     foreach($elements as $element) {
       
       //hide($webform[$element]);
-      $form['submitted'][$element]['#prefix'] = "<span id='sharpe-calc-input-{$element}'>";
+      $form['submitted'][$element]['#prefix'] = "<span id='webform-calculator-input-{$element}'>";
       $form['submitted'][$element]['#suffix'] = '</span>';
     }
     
@@ -128,7 +134,7 @@ function webform_calculator_ajax_callback(&$form, &$form_state) {
 
 function webform_calculator_node_view($node, $view_mode) {
   
-  if($node->type == 'example_calculation') {
+  if(_should_replace_webform_body_tokens($node)) {
     
     $submission = _webform_calculator_recent_submission_or_defaults($node);
     
