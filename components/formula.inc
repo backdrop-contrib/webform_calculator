@@ -27,15 +27,21 @@ function _webform_defaults_formula() {
 function _webform_edit_formula($component) {
   $form = array();
   $form['value'] = array(
-    '#type' => 'text_format',
+    '#type' => 'textfield',
     '#title' => t('Value'),
     '#default_value' => $component['value'],
     '#description' => t('Formula allows you compute the values of other components.') . theme('webform_token_help'),
     '#weight' => -1,
-    '#format' => $component['extra']['format'],
     '#element_validate' => array('_webform_edit_formula_validate'),
   );
-
+  
+  $form['extra']['precision'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Precision'),
+    '#size' => 3,
+    '#default_value' => $component['extra']['precision'],
+    '#description' => t('Number of significant digits (after the decmial point).'),
+  );
   $form['extra']['description'] = array(); // No description for formula.
   $form['display'] = array('#type' => 'markup'); // Hide the display options.
 
@@ -43,11 +49,11 @@ function _webform_edit_formula($component) {
 }
 
 /**
- * Element validate handler; Set the text format value.
+ * Element validate handler; Set the precision value.
  */
 function _webform_edit_formula_validate($form, &$form_state) {
   if (is_array($form_state['values']['value'])) {
-    $form_state['values']['extra']['format'] = $form_state['values']['value']['format'];
+    $form_state['values']['extra']['precision'] = $form_state['values']['value']['precision'];
     $form_state['values']['value'] = $form_state['values']['value']['value'];
   }
 }
@@ -62,8 +68,7 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
     '#type' => 'markup',
     '#title' => $filter ? NULL : $component['name'],
     '#weight' => $component['weight'],
-    '#markup' => $filter ? _webform_filter_values(check_markup($component['value'], $component['extra']['format'], '', TRUE), NULL, NULL, NULL, FALSE) : $component['value'],
-    '#format' => $component['extra']['format'],
+    '#markup' => $filter ? _webform_filter_values(check_plain($component['value']), NULL, NULL, NULL, FALSE) : $component['value'],
     '#theme_wrappers' => array('webform_element'),
     '#webform_component' => $component,
   );
@@ -77,6 +82,6 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
 /**
  * Implements _webform_display_component().
  */
-function _webform_display_formula($component, $value, $format = 'html') {
+function _webform_display_formula($component, $value) {
   return array();
 }

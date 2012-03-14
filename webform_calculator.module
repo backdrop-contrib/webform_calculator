@@ -66,8 +66,9 @@ function _webform_calculator_compute_formula_components($webform, &$submission) 
     // Run the math.
     $value = str_replace(array_keys($name_val), array_values($name_val), $formula['value']);
     module_load_include('php', 'webform_calculator', 'evalmath.class');
+    $precision = !empty($formula['extra']['precision']) ? $formula['extra']['precision'] : 2;
     $m = new EvalMath();
-    $submission->data[$formula['cid']]['value'][0] = round($m->evaluate($value), 2);
+    $submission->data[$formula['cid']]['value'][0] = round($m->evaluate($value), $precision);
   }
 }
 
