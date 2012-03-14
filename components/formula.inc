@@ -34,12 +34,11 @@ function _webform_edit_formula($component) {
     '#weight' => -1,
     '#element_validate' => array('_webform_edit_formula_validate'),
   );
-  
   $form['extra']['precision'] = array(
     '#type' => 'textfield',
     '#title' => t('Precision'),
     '#size' => 3,
-    '#default_value' => $component['extra']['precision'],
+    '#default_value' => !empty($component['extra']['precision']) ? $component['extra']['precision'] : NULL,
     '#description' => t('Number of significant digits (after the decmial point).'),
   );
   $form['extra']['description'] = array(); // No description for formula.
