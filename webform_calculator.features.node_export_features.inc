@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * sharpe_calculator.features.node_export_features.inc
+ * webform_calculator.features.node_export_features.inc
  */
 
 /**
  * Implements hook_node_export_features_default().
  */
-function sharpe_calculator_node_export_features_default() {
+function webform_calculator_node_export_features_default() {
   $node_export = array(
   'code_string' => 'array(
   array(

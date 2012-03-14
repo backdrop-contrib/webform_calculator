@@ -1,5 +1,5 @@
 (function ($) {
-  Drupal.behaviors.sharpe_calculator = {
+  Drupal.behaviors.webform_calculator = {
     attach: function(context) {
       
       $('.sharpe-jeditable', context).editable(function(value, settings) {

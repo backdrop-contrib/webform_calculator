@@ -55,7 +55,7 @@ function _webform_edit_formula_validate($form, &$form_state) {
 /**
  * Implements _webform_render_component().
  * This function is loaded too late in the game, the REAL render functionality
- * is in sharpe_calculator.module hook_node_load()
+ * is in webform_calculator.module hook_node_load()
  */
 function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
   $element = array(

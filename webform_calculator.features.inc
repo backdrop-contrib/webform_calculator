@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * sharpe_calculator.features.inc
+ * webform_calculator.features.inc
  */
 
 /**
  * Implements hook_ctools_plugin_api().
  */
-function sharpe_calculator_ctools_plugin_api() {
+function webform_calculator_ctools_plugin_api() {
   list($module, $api) = func_get_args();
   if ($module == "strongarm" && $api == "strongarm") {
     return array("version" => "1");
@@ -17,7 +17,7 @@ function sharpe_calculator_ctools_plugin_api() {
 /**
  * Implements hook_node_info().
  */
-function sharpe_calculator_node_info() {
+function webform_calculator_node_info() {
   $items = array(
     'example_calculation' => array(
       'name' => t('Example Calculation'),

@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * sharpe_calculator.features.field.inc
+ * webform_calculator.features.field.inc
  */
 
 /**
  * Implements hook_field_default_fields().
  */
-function sharpe_calculator_field_default_fields() {
+function webform_calculator_field_default_fields() {
   $fields = array();
 
   // Exported field: 'node-example_calculation-body'

@@ -20,7 +20,7 @@
 
 
 //TODO can put this whole thing in webform_submission_load
-function _sharpe_calculator_recent_submission_or_defaults($node) {
+function _webform_calculator_recent_submission_or_defaults($node) {
   global $user;
   module_load_include('inc', 'webform', 'includes/webform.submissions');
   $submissions = webform_get_submissions( array('nid'=>$node->nid, 'u.uid'=>$user->uid) );
@@ -36,7 +36,7 @@ function _sharpe_calculator_recent_submission_or_defaults($node) {
       $submission['data'][$component['cid']] = $component;
     }
     $submission = (object)$submission;
-    _sharpe_calculator_compute_formula_components($node, $submission);
+    _webform_calculator_compute_formula_components($node, $submission);
     return $submission;
   }
 }
@@ -49,9 +49,9 @@ function _sharpe_calculator_recent_submission_or_defaults($node) {
  *   An array of Webform submissions that are being loaded, keyed by the
  *   submission ID. Modifications to the submissions are done by reference.
  */
-function sharpe_calculator_webform_submission_load(&$submissions) {
+function webform_calculator_webform_submission_load(&$submissions) {
   foreach ($submissions as $sid => $submission) {
-    _sharpe_calculator_compute_formula_components( node_load($submission->nid), $submission);
+    _webform_calculator_compute_formula_components( node_load($submission->nid), $submission);
   }
 }
 
@@ -59,7 +59,7 @@ function sharpe_calculator_webform_submission_load(&$submissions) {
  * Compute the value of webform formulate components, rather than displaying the equation
  * Note this has to be done in node_load rather than _webform_render_formula() because of order
  */
-function _sharpe_calculator_compute_formula_components($webform, &$submission) {
+function _webform_calculator_compute_formula_components($webform, &$submission) {
   
   // Load the webform components' form_keys (not available in $submission), 
   $name_val = array();
@@ -83,13 +83,13 @@ function _sharpe_calculator_compute_formula_components($webform, &$submission) {
     
     // Run the math
     $value = str_replace(array_keys($name_val), array_values($name_val), $formula['value']);
-    module_load_include('php', 'sharpe_calculator', 'evalmath.class');
+    module_load_include('php', 'webform_calculator', 'evalmath.class');
     $m = new EvalMath;
     $submission->data[$formula['cid']]['value'][0] = $m->evaluate($value);
   }
 }
 
-function sharpe_calculator_form_alter(&$form, &$form_state, $form_id) {
+function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
   if( strstr($form_id, 'webform_client_form_') && $form['#node']->type == 'example_calculation') {
     
     // Decorate our webform & node body for ajax
@@ -104,37 +104,37 @@ function sharpe_calculator_form_alter(&$form, &$form_state, $form_id) {
     }
     
     $form['actions']['submit']['#ajax'] = array(
-      'callback' => 'sharpe_calculator_ajax_callback',
+      'callback' => 'webform_calculator_ajax_callback',
       'wrapper' => 'node-' . $form['#node']->nid,
       //'wrapper' => 'webform-client-form-' . $nid,
       //'wrapper' => 'sharpe-calc-body',
       'method' => 'replace',
     );
-    $form['#submit'][] = 'sharpe_calculator_ajax_form_submit';
+    $form['#submit'][] = 'webform_calculator_ajax_form_submit';
   }
 }
 
-function sharpe_calculator_ajax_form_submit(&$form, &$form_state) {
+function webform_calculator_ajax_form_submit(&$form, &$form_state) {
   //You'll get an error about undefined index without this
   $form_state['rebuild'] = TRUE;
 }
 
-function sharpe_calculator_ajax_callback(&$form, &$form_state) {
+function webform_calculator_ajax_callback(&$form, &$form_state) {
   $node = node_view( node_load($form['#node']->nid), 'ajax' );
   return $node;
 }
 
 
 
-function sharpe_calculator_node_view($node, $view_mode) {
+function webform_calculator_node_view($node, $view_mode) {
   
   if($node->type == 'example_calculation') {
     
-    $submission = _sharpe_calculator_recent_submission_or_defaults($node);
+    $submission = _webform_calculator_recent_submission_or_defaults($node);
     
     // Token-replace the body
     $data = array('webform'=>$submission);
-    $options = array('callback'=>'sharpe_calculator_alter_replacements');
+    $options = array('callback'=>'webform_calculator_alter_replacements');
     $body = &$node->content['body'][0]['#markup'];
     $body = token_replace($body, $data, $options);
     $body = "<div id='sharpe-calc-body'>$body</div>";
@@ -143,8 +143,8 @@ function sharpe_calculator_node_view($node, $view_mode) {
     if( $view_mode == 'full') {
       // Add inline-edit javascript functionality
       //TODO add as #attached to webform
-      drupal_add_js(drupal_get_path('module', 'sharpe_calculator').'/jquery.jeditable.mini.js');
-      drupal_add_js(drupal_get_path('module', 'sharpe_calculator').'/sharpe_calculator.js');
+      drupal_add_js(drupal_get_path('module', 'webform_calculator').'/jquery.jeditable.mini.js');
+      drupal_add_js(drupal_get_path('module', 'webform_calculator').'/webform_calculator.js');
       
       // No submission yet
       if( $submission->sid == 'defaults' ) {  
@@ -180,7 +180,7 @@ function sharpe_calculator_node_view($node, $view_mode) {
 }
 
 
-function sharpe_calculator_alter_replacements(&$replacements, $data, $options) {
+function webform_calculator_alter_replacements(&$replacements, $data, $options) {
   // Add a div with ID for jeditable
   foreach($replacements as $id=>$replacement) {
     //$html_id = drupal_html_id($id);
@@ -195,7 +195,7 @@ function sharpe_calculator_alter_replacements(&$replacements, $data, $options) {
 /**
  * Implementation of hook_webform_component_info()
  */
-function sharpe_calculator_webform_component_info() {
+function webform_calculator_webform_component_info() {
   $components = array();
 
   $components['formula'] = array(

@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * sharpe_calculator.strongarm.inc
+ * webform_calculator.strongarm.inc
  */
 
 /**
  * Implements hook_strongarm().
  */
-function sharpe_calculator_strongarm() {
+function webform_calculator_strongarm() {
   $export = array();
 
   $strongarm = new stdClass();
