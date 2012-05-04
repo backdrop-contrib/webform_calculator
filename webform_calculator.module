@@ -167,6 +167,18 @@ function webform_calculator_alter_replacements(&$replacements, $data, $options) 
     //$html_id = drupal_html_id($id);
     $html_id = str_replace('[webform:webform-val-', '', $id);
     $html_id = str_replace(']', '', $html_id);
+
+    // Skip formula components, we don't want those to be inline-editable
+    $is_formula_component = false;
+    foreach ($data['webform']->data as $component) {
+      if ($component['form_key'] == $html_id && $component['type'] == 'formula') {
+        $is_formula_component = true;
+      }
+    }
+    if ($is_formula_component) {
+      continue;
+    }
+    
     $html_id = "webform-calculator-inline-{$html_id}";
     // TODO only if :input
     $replacements[$id] = "<u><span class='webform-calculator-jeditable' id=\"{$html_id}\">{$replacement}</span></u>";
