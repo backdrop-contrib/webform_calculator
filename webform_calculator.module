@@ -3,6 +3,8 @@
  * @file
  */
 
+module_load_include('inc', 'webform_calculator', 'webform_calculator.admin');
+
 //TODO can put this whole thing in webform_submission_load
 function _webform_calculator_recent_submission_or_defaults($node) {
   global $user;
@@ -97,6 +99,10 @@ function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
     );
     $form['#submit'][] = 'webform_calculator_ajax_form_submit';
   }
+  
+	if ($form_id == 'webform_admin_settings') {
+		webform_calculator_webform_settings_form_alter($form, $form_state, $form_id);
+	}  
 }
 
 function webform_calculator_ajax_form_submit(&$form, &$form_state) {
