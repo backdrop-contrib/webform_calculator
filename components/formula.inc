@@ -29,6 +29,7 @@ function _webform_edit_formula($component) {
   $form['value'] = array(
     '#type' => 'textfield',
     '#title' => t('Value'),
+  	'#size' => 256,
     '#default_value' => $component['value'],
     '#description' => t('Formula allows you compute the values of other components.') . theme('webform_token_help'),
     '#weight' => -1,
@@ -40,6 +41,18 @@ function _webform_edit_formula($component) {
     '#size' => 3,
     '#default_value' => !empty($component['extra']['precision']) ? $component['extra']['precision'] : NULL,
     '#description' => t('Number of significant digits (after the decmial point).'),
+  );
+  $form['extra']['formula_source'] = array(
+ 		'#type' => 'select',
+  	'#title' => 'Calculation Method',
+  	'#options' => array(
+  		'math' => 'Basic Math',
+  		'service' => 'Web Service'
+  	 ),
+  	'#default_value' => !empty($component['extra']['method']) ? $component['extra']['method'] : 'math',
+  	'#description' => 'Formulae support standard math operations like <em>(component1+component2)/component3</em> by default.
+  			It also supports sending component values to a web service, like <em>service1:multiply(component1,component2)</em>. 
+  			To do that, select that "Web Service" and <a href="/admin/config/content/webform">define the service endpoints here.</a>',
   );
   $form['extra']['description'] = array(); // No description for formula.
   $form['display'] = array('#type' => 'markup'); // Hide the display options.
