@@ -32,9 +32,22 @@ function _webform_edit_formula($component) {
   	'#size' => 256,
   	'#maxlength' => 1028,
     '#default_value' => $component['value'],
-    '#description' => t('Formula allows you compute the values of other components.') . theme('webform_token_help'),
+    '#description' => t('Enter the calculation with components in brackets.<br/>
+    		Standard math example: <em>({component1}+{component2})/{component3}</em><br/>
+    		Web service example: <em>http://calculation-service.com/mathMethod?val1={component1}&val2={component2}</em>
+    		'),
     '#weight' => -1,
     '#element_validate' => array('_webform_edit_formula_validate'),
+  );
+  $form['extra']['method'] = array(
+  		'#type' => 'select',
+  		'#title' => 'Calculation Method',
+  		'#options' => array(
+  				'math' => 'Basic Math',
+  				'service' => 'Web Service'
+  		),
+  		'#default_value' => !empty($component['extra']['method']) ? $component['extra']['method'] : 'math',
+  		'#description' =>t('Formula allows you to compute the values of other components via standard math operations or via web services.'),
   );
   $form['extra']['precision'] = array(
     '#type' => 'textfield',
@@ -42,18 +55,6 @@ function _webform_edit_formula($component) {
     '#size' => 3,
     '#default_value' => !empty($component['extra']['precision']) ? $component['extra']['precision'] : NULL,
     '#description' => t('Number of significant digits (after the decmial point).'),
-  );
-  $form['extra']['method'] = array(
- 		'#type' => 'select',
-  	'#title' => 'Calculation Method',
-  	'#options' => array(
-  		'math' => 'Basic Math',
-  		'service' => 'Web Service'
-  	 ),
-  	'#default_value' => !empty($component['extra']['method']) ? $component['extra']['method'] : 'math',
-  	'#description' => 'Formulae support standard math operations like <em>(component1+component2)/component3</em> by default.
-  			It also supports sending component values to a web service, like <em>service1:multiply(component1,component2)</em>. 
-  			To do that, select that "Web Service" and <a href="/admin/config/content/webform">define the service endpoints here.</a>',
   );
   $form['extra']['description'] = array(); // No description for formula.
   $form['display'] = array('#type' => 'markup'); // Hide the display options.

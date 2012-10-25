@@ -67,8 +67,6 @@ function _webform_calculator_compute_formula_components($webform, &$submission) 
   	
   	// Run the math.
     if ($formula['extra']['method'] == 'math') {
-    	//TODO use {} variables like service method
-    	
 	    module_load_include('php', 'webform_calculator', 'evalmath.class');
 	    $precision = !empty($formula['extra']['precision']) ? $formula['extra']['precision'] : 2;
 	    $m = new EvalMath();
