@@ -30,6 +30,7 @@ function _webform_edit_formula($component) {
     '#type' => 'textfield',
     '#title' => t('Value'),
   	'#size' => 256,
+  	'#maxlength' => 1028,
     '#default_value' => $component['value'],
     '#description' => t('Formula allows you compute the values of other components.') . theme('webform_token_help'),
     '#weight' => -1,
@@ -42,7 +43,7 @@ function _webform_edit_formula($component) {
     '#default_value' => !empty($component['extra']['precision']) ? $component['extra']['precision'] : NULL,
     '#description' => t('Number of significant digits (after the decmial point).'),
   );
-  $form['extra']['formula_source'] = array(
+  $form['extra']['method'] = array(
  		'#type' => 'select',
   	'#title' => 'Calculation Method',
   	'#options' => array(

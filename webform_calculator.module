@@ -59,43 +59,27 @@ function _webform_calculator_compute_formula_components($webform, &$submission) 
     else {
       $value = $submission->data[$c['cid']]['value'][0];
     }
-    $name_val[$c['form_key']] = $value;
+    $name_val['{'.$c['form_key'].'}'] = $value;
   }
   foreach ($formulas as $cid => $formula) {
     // Filter for safety (unecessary, EvalMath takes care of that for us)
     //$value = $filter ? _webform_filter_values(check_markup($component['value'], $component['extra']['format'], '', TRUE), NULL, NULL, NULL, FALSE) : $component['value'].
   	
-    // Run the math.
+  	$value = str_replace(array_keys($name_val), array_values($name_val), $formula['value']);
+  	
+  	// Run the math.
     if ($formula['extra']['method'] == 'math') {
+    	//TODO use {} variables like service method
     	
-	    $value = str_replace(array_keys($name_val), array_values($name_val), $formula['value']);
 	    module_load_include('php', 'webform_calculator', 'evalmath.class');
 	    $precision = !empty($formula['extra']['precision']) ? $formula['extra']['precision'] : 2;
 	    $m = new EvalMath();
 	    $submission->data[$formula['cid']]['value'][0] = round($m->evaluate($value), $precision);
 	    
+	  // Or the web service
     } elseif ($formula['extra']['method'] == 'service') {
-    	$services = variable_get('webform_calculator_services', array());
-    	if (empty($services)) { // no services defined in webform settings
-    		return;
-    	}
-    	// map them as array('service1'=>'http://service1.com') for easier lookup, they're indexed numerically 
-    	foreach($services as $key => $service) {
-    		$services[$service['machine_name']] = $service['endpoint'];
-    		unset($services[$key]);
-    	}
-    	
-    	// match regex like [0] => service:method(arg1,arg2) [1] => service [2] => method [3] => arg1,arg2
-//     	$pattern = '/^(\w+)\:(\w+)\(([\w\s\,\-]*)(?=\))\)/s';
-//     	$subject = $formula['value'];
-//     	preg_match($pattern,$subject,$matches);
-//     	$endpoint = $services[$matches[1]];
-//     	$method = $services[$matches[2]];
-//     	$args = explode(',', $services[$matches[3]]);
-    	 
-
     	$ch = curl_init();
-	    curl_setopt($ch, CURLOPT_URL, 'http://localhost:3000/crat_term?trustTerm=20&trustAmount=99999&payoutRate=.04&AFMR=.013&trustPayments=4');
+	    curl_setopt($ch, CURLOPT_URL, $value);
 	    // Should cURL return or print out the data? (true = return, false = print)
 	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	    $output = curl_exec($ch);
