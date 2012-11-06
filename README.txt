@@ -37,3 +37,8 @@
      Note that this step is currently required - Webform Calculator doesn't yet support replacing Formula components based
      on the input of fields on a standard webform's output. You have to edit the Body field and enter valid Webform Tokens.
      Stupid, I know - but my current client doesn't need it and I don't have time for stuff. FIXME.
+     
+# Beautytips
+If you want popups when a user hovers over an editable field, download and enable [Beautytips](http://drupal.org/project/beautytips). 
+Be sure to configure Beautytips to "Add beautytips js to every page" (admin/config/user-interface/beautytips), or use your own method
+for adding it to specific pages.
