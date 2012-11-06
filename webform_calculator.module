@@ -80,7 +80,16 @@ function _webform_calculator_compute_formula_components($webform, &$submission) 
 	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	    $output = curl_exec($ch);
 	    curl_close($ch);
-	    $submission->data[$formula['cid']]['value'][0] = json_decode($output)->result;
+	    
+	    $result = '';
+	   	if ($output) {
+	   		$result = json_decode($output)->result;
+	   	} else {
+	   		drupal_set_message("Error accessing the web service {$value}", 'error');
+	   		$result = "(Formula error, see Drupal message)";
+	   	}
+	    
+	    $submission->data[$formula['cid']]['value'][0] = $result;
     	
     }
     
