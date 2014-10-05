@@ -31,7 +31,7 @@ function webform_calculator_webform_submission_presave($node, &$submission) {
 
   foreach ($node->webform['components'] as $component) {
     if ($component['type'] == 'formula') {
-      $submission->data[$component['cid']]['value'][0] = webform_calculator_replace_formula_values($component, $node, $submission);
+      $submission->data[$component['cid']][0] = webform_calculator_replace_formula_values($component, $node, $submission);
     }
   }
 }
@@ -86,7 +86,7 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
   foreach ($components_from_formula as $component_key) {
     if (isset($components_by_key[$component_key])) {
       $component = $components_by_key[$component_key];
-      $formula = str_replace('{' . $component_key . '}', '(' . $submission->data[$component['cid']]['value'][0] . ')', $formula);
+      $formula = str_replace('{' . $component_key . '}', '(' . $submission->data[$component['cid']][0] . ')', $formula);
     }
   }
 
