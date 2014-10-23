@@ -19,6 +19,7 @@ function _webform_defaults_formula() {
       'precision' => 1,
       'hidden' => FALSE,
       'private' => FALSE,
+      'error_message' => '',
     ),
   );
 }
@@ -46,6 +47,7 @@ function _webform_edit_formula($component) {
   $fieldset = theme('fieldset', array('element' => $fieldset));
 
   $form = array();
+
   $form['value'] = array(
     '#type' => 'textfield',
     '#title' => t('Formula value'),
@@ -55,6 +57,15 @@ function _webform_edit_formula($component) {
     '#weight' => -3,
     '#element_validate' => array('_webform_edit_formula_validate'),
   );
+
+  $form['extra']['error_message'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Error message'),
+    '#default_value' => $component['extra']['error_message'],
+    '#description' => t('This message will be displayed when values of components inside formula will be empty or incorrect. By default user will see <strong>Enter correct value for %fields to see result</strong> message. Leave this field empty to use default message.'),
+    '#weight' => -3,
+  );
+
   $form['extra']['precision'] = array(
     '#type' => 'select',
     '#title' => t('Precision'),
@@ -63,6 +74,7 @@ function _webform_edit_formula($component) {
     '#options' => range(0, 10),
     '#weight' => -2,
   );
+
   $form['extra']['hidden'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hidden'),

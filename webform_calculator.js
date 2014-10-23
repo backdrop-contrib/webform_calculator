@@ -26,7 +26,6 @@
 
   // Replace tokens from formula with numeric values from components.
   Drupal.webformCalculator.evaluateFormula = function(formulaComponent) {
-    console.log(formulaComponent);
     var formulaReplaced = formulaComponent.value;
     var elements = Drupal.webformCalculator.getComponentsKeys(formulaComponent);
 
@@ -47,7 +46,7 @@
 
     if (invalidFields.length > 0) {
       invalidFields = Drupal.webformCalculator.unique(invalidFields);
-      var message = Drupal.t('Enter correct value for %fields to see result.', {'%fields': invalidFields.join(', ')});
+      var message = formulaComponent.extra.error_message || Drupal.t('Enter correct value for %fields to see result.', {'%fields': invalidFields.join(', ')});
       $('#formula-component-' + formulaComponent.form_key).html(message);
     }
     else {
