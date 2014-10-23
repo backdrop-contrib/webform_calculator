@@ -1,32 +1,34 @@
-(function($, Drupal) {
+(function($) {
 
-  Drupal.behaviors.webform_calculator = {
+  Drupal.behaviors.webformCalculator = {
     attach: function(context, settings) {
-      for (var index in settings.webform_calculator) {
-        var component = settings.webform_calculator[index];
-        var elements = Drupal.webform_calculator.getComponentsKeys(component);
+      Drupal.webformCalculator.evaluateAllFormulas();
 
-        Drupal.webform_calculator.replaceTokens(component);
+      for (var index in settings.webformCalculator) {
+        var component = settings.webformCalculator[index];
+        var elements = Drupal.webformCalculator.getComponentsKeys(component);
 
         $(elements).each(function(index, componentKey) {
-          $('input[name$="[' + componentKey + ']"]', context).unbind('keyup').bind('keyup', {comp: component}, function(event) {
-              Drupal.webform_calculator.replaceTokens(event.data.comp);
+          $('input[name$="[' + componentKey + ']"]', context).unbind('keyup').bind('keyup', function(event) {
+            Drupal.webformCalculator.evaluateAllFormulas();
           });
         });
       }
     }
   };
 
-  Drupal.webform_calculator = {};
+  Drupal.webformCalculator = {};
 
-  Drupal.webform_calculator.getComponentsKeys = function(formulaComponent) {
+  // Get keys of components that were used inside formula.
+  Drupal.webformCalculator.getComponentsKeys = function(formulaComponent) {
     return formulaComponent.value.match(/[^{}]+(?=\})/g);
   };
 
-  Drupal.webform_calculator.replaceTokens = function(formulaComponent) {
-    // console.log(formulaComponent);
+  // Replace tokens from formula with numeric values from components.
+  Drupal.webformCalculator.evaluateFormula = function(formulaComponent) {
+    console.log(formulaComponent);
     var formulaReplaced = formulaComponent.value;
-    var elements = Drupal.webform_calculator.getComponentsKeys(formulaComponent);
+    var elements = Drupal.webformCalculator.getComponentsKeys(formulaComponent);
 
     var invalidFields = [];
     $(elements).each(function(index, componentKey) {
@@ -44,20 +46,29 @@
     });
 
     if (invalidFields.length > 0) {
-      invalidFields = Drupal.webform_calculator.unique(invalidFields);
-      var message = Drupal.t('Enter correct value for %fields to see result.', { '%fields': invalidFields.join(', ') });
+      invalidFields = Drupal.webformCalculator.unique(invalidFields);
+      var message = Drupal.t('Enter correct value for %fields to see result.', {'%fields': invalidFields.join(', ')});
       $('#formula-component-' + formulaComponent.form_key).html(message);
     }
     else {
       var formulaResult = eval(formulaReplaced);
-      formulaResult = Drupal.webform_calculator.round(formulaResult, formulaComponent.extra.precision);
+      formulaResult = Drupal.webformCalculator.round(formulaResult, formulaComponent.extra.precision);
       $('#formula-component-' + formulaComponent.form_key).text(formulaResult);
     }
   };
 
-  Drupal.webform_calculator.unique = function(array) {
+  // Evaluate all formulas.
+  Drupal.webformCalculator.evaluateAllFormulas = function() {
+    for (var index in Drupal.settings.webformCalculator) {
+      var component = Drupal.settings.webformCalculator[index];
+      Drupal.webformCalculator.evaluateFormula(component);
+    }
+  };
+
+  // Get unique elements from array.
+  Drupal.webformCalculator.unique = function(array) {
      var u = {}, a = [];
-     for(var i = 0, l = array.length; i < l; ++i) {
+     for (var i = 0, l = array.length; i < l; ++i) {
       if (u.hasOwnProperty(array[i])) {
        continue;
      }
@@ -67,9 +78,10 @@
     return a;
   };
 
-  Drupal.webform_calculator.round = function(number, places) {
+  // Round result of calculation.
+  Drupal.webformCalculator.round = function(number, places) {
     var multiplier = Math.pow(10, places);
     return (Math.round(number * multiplier) / multiplier);
   }
 
-})(jQuery, Drupal);
+})(jQuery);

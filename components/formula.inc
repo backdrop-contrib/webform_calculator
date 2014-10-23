@@ -130,7 +130,7 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
   $element['#attached']['js'][] = array(
     'type' => 'setting',
     'data' => array(
-      'webform_calculator' => array($component['cid'] => $component),
+      'webformCalculator' => array($component['cid'] => $component),
     ),
   );
   // Adding module JS file.
