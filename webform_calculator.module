@@ -122,6 +122,7 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
     return webform_calculator_eval($formula, $formula_component['extra']['precision']);
   }
   catch (Exception $e) {
+    watchdog_exception('webform_calculator', $e);
     return 0;
   }
 }
@@ -149,19 +150,19 @@ function webform_calculator_validate_php($code) {
     // Checking for allowed characters.
     if (is_string($token)) {
       if (!in_array($token, $allowed_chars)) {
-        throw new Exception(t('Disallowed character %char encountered.', array('%char' => $token)));
+        throw new Exception(t('Disallowed character %char was used.', array('%char' => $token)));
       }
       continue;
     }
     // Checking for allowed tokens.
     if (!in_array($token[0], $allowed_tokens)) {
-      throw new Exception(t('Using %token disallowed.', array('%token' => token_name($token[0]))));
+      throw new Exception(t('Using %token is disallowed.', array('%token' => token_name($token[0]))));
     }
   }
 
   // Check PHP syntax.
   ob_start();
-  if (FALSE === @eval('$return_array = ' . $code . ';')) {
+  if (@eval("\$return_array = $code;") === FALSE) {
     throw new Exception(t('Error occurred while parsing code.'));
   }
   else {
