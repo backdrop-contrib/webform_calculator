@@ -77,11 +77,8 @@ function theme_webform_calculator_formula_form($variables) {
  * Implements _webform_render_component().
  */
 function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
-  if ($component['extra']['hidden']) {
-    return;
-  }
-
   $element = array(
+    '#printed' => $component['extra']['hidden'],
     '#type' => 'markup',
     '#title' => $filter ? webform_filter_xss($component['name']) : $component['name'],
     '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
