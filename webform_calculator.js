@@ -44,15 +44,23 @@
       }
     });
 
+    var formulaComponentElement = $('#formula-component-' + formulaComponent.form_key);
+
     if (invalidFields.length > 0) {
       invalidFields = Drupal.webformCalculator.unique(invalidFields);
+      // Set message.
       var message = formulaComponent.extra.error_message || Drupal.t('Enter correct value for %fields to see result.', {'%fields': invalidFields.join(', ')});
-      $('#formula-component-' + formulaComponent.form_key).html(message);
+      formulaComponentElement.html(message);
+      // Hide prefix and suffix.
+      formulaComponentElement.parent().find('.field-prefix, .field-suffix').hide();
     }
     else {
+      // Set result.
       var formulaResult = eval(formulaReplaced);
       formulaResult = Drupal.webformCalculator.round(formulaResult, formulaComponent.extra.precision);
-      $('#formula-component-' + formulaComponent.form_key).text(formulaResult);
+      formulaComponentElement.text(formulaResult);
+      // Show prefix and suffix.
+      formulaComponentElement.parent().find('.field-prefix, .field-suffix').show();
     }
   };
 

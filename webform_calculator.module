@@ -51,21 +51,7 @@ function webform_calculator_eval($formula, $precision = 1) {
  * Implements hook_theme().
  */
 function webform_calculator_theme() {
-  return array(
-    'webform_calculator_formula' => array(
-      'render element' => 'element',
-      'arguments' => array('element' => NULL),
-    ),
-  );
-}
-
-/**
- * Format the output of data for this component.
- */
-function theme_webform_calculator_formula($variables) {
-  $element = $variables['element'];
-  $element['#value'] = empty($element['#value']) ? ' ' : $element['#value'];
-  return $element['#format'] == 'html' ? check_plain($element['#value']) : $element['#value'];
+  return array(webform_component_invoke('formula', 'theme'));
 }
 
 /**
