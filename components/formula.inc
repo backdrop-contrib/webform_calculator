@@ -256,7 +256,7 @@ function _webform_csv_headers_formula($component, $export_options) {
   return array(
     0 => '',
     1 => '',
-    2 => $component['name'],
+    2 => $export_options['header_keys'] ? $component['form_key'] : $component['name'],
   );
 }
 
