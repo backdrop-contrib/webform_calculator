@@ -108,13 +108,21 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
 }
 
 /**
+ * Reusable constant.
+ */
+function _webform_calculator_allowed_component_types() {
+  return array('number' => 1, 'formula' => 1, 'select' => 1);
+}
+
+/**
  * Implements _webform_edit_component().
  */
 function _webform_edit_formula($component) {
+  $allowed_component_types = _webform_calculator_allowed_component_types();
   $webform_node = node_load($component['nid']);
   $available_components = array();
   foreach ($webform_node->webform['components'] as $node_component) {
-    if ($node_component['type'] == 'number') {
+    if (isset($allowed_component_types[$node_component['type']])) {
       $available_components[] = '{' . $node_component['form_key'] . '} — ' . $node_component['name'];
     }
   }
@@ -216,11 +224,12 @@ function _webform_edit_formula_validate($element, &$element_state) {
     $components_by_key[$component['form_key']] = $component;
   }
 
+  $allowed_component_types = _webform_calculator_allowed_component_types();
   foreach ($components_from_formula as $component_key) {
     if (!isset($components_by_key[$component_key])) {
       form_error($element, t('Webform component %component does not exist.', array('%component' => $component_key)));
     }
-    elseif ($components_by_key[$component_key]['type'] != 'number') {
+    elseif (!isset($allowed_component_types[$components_by_key[$component_key]['type']])) {
       form_error($element, t('Entered component %component is not numeric type.', array('%component' => $component_key)));
     }
   }

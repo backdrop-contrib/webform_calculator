@@ -99,7 +99,12 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
   foreach ($components_from_formula as $component_key) {
     if (isset($components_by_key[$component_key])) {
       $component = $components_by_key[$component_key];
-      $formula = str_replace('{' . $component_key . '}', '(' . $submission->data[$component['cid']][0] . ')', $formula);
+      $values = $submission->data[$component['cid']];
+      $sum = 0;
+      foreach ($values as $value) {
+        $sum += $value;
+      }
+      $formula = str_replace('{' . $component_key . '}', '(' . $sum . ')', $formula);
     }
   }
 
