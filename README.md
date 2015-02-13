@@ -6,3 +6,9 @@ Installation and configuration
 3. Create few webform fields of type textfield or number.
 4. Create formula webform field.
 5. View this webform and fill newly added fields.
+
+
+Usage
+-----
+Available operators:
++, -, *, /, ^, (, ), %, ?, :, <, >, <=, >=, ==, &&, ||

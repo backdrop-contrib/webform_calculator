@@ -120,6 +120,8 @@ function _webform_calculator_allowed_component_types() {
 function _webform_edit_formula($component) {
   $allowed_component_types = _webform_calculator_allowed_component_types();
   $webform_node = node_load($component['nid']);
+
+  // Create list of available tokens for formula description.
   $available_components = array();
   foreach ($webform_node->webform['components'] as $node_component) {
     if (isset($allowed_component_types[$node_component['type']])) {
@@ -139,12 +141,19 @@ function _webform_edit_formula($component) {
 
   $form = array();
 
+  // Create description for formula value.
+  $element_description = t('Enter the calculation formula with components in brackets.');
+  $allowed_operators = '+, -, *, /, ^, (, ), %, ?, :, <, >, <=, >=, ==, &&, ||';
+  $allowed_operators_message = t('Allowed operators: %operators', array('%operators' => $allowed_operators));
+  $example_formula = '{component1} + {component2} / {component3}';
+  $available_tokens_message = t('Example: %example', array('%example' => $example_formula));
+
   $form['value'] = array(
     '#type' => 'textfield',
     '#title' => t('Formula value'),
     '#maxlength' => 1028,
     '#default_value' => $component['value'],
-    '#description' => t('Enter the calculation with components in brackets.<br/>Example: <em>({component1} + {component2}) / {component3}</em>') . $fieldset,
+    '#description' => "$element_description<br/>$allowed_operators_message<br/>$available_tokens_message<br/>$fieldset",
     '#weight' => -3,
     '#element_validate' => array('_webform_edit_formula_validate'),
   );
