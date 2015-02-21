@@ -130,8 +130,8 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
  * @throws Exception
  */
 function webform_calculator_validate_php($code) {
-  $allowed_tokens = array(T_LNUMBER, T_DNUMBER, T_WHITESPACE, T_IS_SMALLER_OR_EQUAL, T_IS_GREATER_OR_EQUAL, T_IS_EQUAL, T_BOOLEAN_AND, T_BOOLEAN_OR);
-  $allowed_chars = array('+', '-', '*', '/', '^', '(', ')', '%', '?', ':', '<', '>');
+  $allowed_tokens = array(T_LNUMBER, T_DNUMBER, T_WHITESPACE);
+  $allowed_chars = array('+', '-', '*', '/', '^', '(', ')', '%');
 
   $tokens = token_get_all('<?php ' . $code);
   // Remove opening php tag.
