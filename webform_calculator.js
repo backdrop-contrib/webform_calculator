@@ -9,10 +9,10 @@
         var elements = Drupal.webformCalculator.getComponentsKeys(component);
 
         $(elements).each(function(index, componentKey) {
-          const handler = function (event) {
+          var handler = function (event) {
             Drupal.webformCalculator.evaluateAllFormulas();
           };
-          const selector =''
+          var selector = ''
                   + 'input:text[name$="[' + componentKey + ']"]' // Number, Single select
                   + ', '
                   + 'select[name$="[' + componentKey + ']"]' // Number, Single select
