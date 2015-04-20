@@ -59,6 +59,10 @@ function theme_webform_calculator_formula_display($variables) {
  */
 function _webform_display_formula($component, $value, $format = 'html') {
   webform_component_include('number');
+  $component['extra']['decimals'] = NULL;
+  $component['extra']['point'] = '.';
+  $component['extra']['separator'] = ',';
+
   $element = _webform_display_number($component, $value, $format);
   $element['#theme'] = 'webform_calculator_formula_display';
   $element['#value'] = isset($value[0]) ? $value[0] : '';
