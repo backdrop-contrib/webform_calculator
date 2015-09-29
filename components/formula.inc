@@ -225,7 +225,7 @@ function _webform_edit_formula_validate($element, &$element_state) {
     webform_calculator_validate_php($formula);
   }
   catch (Exception $e) {
-    form_error($element, t('The formula syntax is invalid. @error', array('@error' => $e->getMessage())));
+    form_error($element, t('The formula syntax is invalid. !error', array('!error' => $e->getMessage())));
   }
 
   $components_from_formula = webform_calculator_get_components_from_formula($original_formula);
