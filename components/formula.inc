@@ -147,7 +147,7 @@ function _webform_edit_formula($component) {
 
   // Create description for formula value.
   $element_description = t('Enter the calculation formula with components in brackets.');
-  $allowed_operators = '+, -, *, /, ^, (, ), %, ?, :, <, >, <=, >=, ==, &&, ||';
+  $allowed_operators = '+, -, *, /, (, ), %, ?, :, <, >, <=, >=, ==, &&, ||';
   $allowed_operators_message = t('Allowed operators: %operators', array('%operators' => $allowed_operators));
   $example_formula = '{component1} + {component2} / {component3}';
   $available_tokens_message = t('Example: %example', array('%example' => $example_formula));

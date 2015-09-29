@@ -131,7 +131,7 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
  */
 function webform_calculator_validate_php($code) {
   $allowed_tokens = array(T_LNUMBER, T_DNUMBER, T_WHITESPACE);
-  $allowed_chars = array('+', '-', '*', '/', '^', '(', ')', '%');
+  $allowed_chars = array('+', '-', '*', '/', '(', ')', '%');
 
   $tokens = token_get_all('<?php ' . $code);
   // Remove opening php tag.

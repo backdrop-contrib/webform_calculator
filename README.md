@@ -11,4 +11,4 @@ Installation and configuration
 Usage
 -----
 Available operators:
-+, -, *, /, ^, (, ), %, ?, :, <, >, <=, >=, ==, &&, ||
++, -, *, /, (, ), %, ?, :, <, >, <=, >=, ==, &&, ||
