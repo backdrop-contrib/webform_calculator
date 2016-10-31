@@ -1,0 +1,5 @@
+/* This css file is only used for the form_builder interface */
+
+#form-builder-field-palette ul li.field-formula {
+  background-image: url(formula.png);
+}

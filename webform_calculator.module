@@ -163,3 +163,48 @@ function webform_calculator_validate_php($code) {
   }
 }
 
+/**
+ * Implements hook_form_builder_element_types().
+ * @param string $form_type
+ * @param int $form_id
+ * @return array
+ */
+function webform_calculator_form_builder_element_types($form_type, $form_id) {
+  if ($form_type == 'webform') {
+    drupal_add_css(drupal_get_path('module', 'webform_calculator') . '/formula.css');
+    $fields = array(
+      'formula' => array(
+        'title' => t('Formula'),
+        'weight' => -30,
+        'properties' => array(
+          'title',
+          'value',
+          'description',
+          'field_prefix',
+          'field_suffix',
+          'hidden',
+          'size',
+          'title_display',
+          'error_message',
+          'precision',
+        ),
+      ),
+    );
+    if (function_exists('_form_builder_webform_default')) {
+      $fields['formula']['default'] = _form_builder_webform_default('formula');
+    }
+    $fields['autocomplete']['default']['#title'] = t('New formula');
+
+    return $fields;
+  }
+}
+
+/**
+ * Implements hook_form_builder_preview_alter().
+ */
+function webform_calculator_form_builder_preview_alter(&$element, $form_type, $form_id) {
+  if ($form_type == 'webform' && $element['#webform_component']['type'] == 'formula') {
+    $element['#attributes']['placeholder'] = $element['#webform_component']['value'];
+  }
+}
+

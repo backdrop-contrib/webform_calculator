@@ -130,6 +130,7 @@ function _webform_edit_formula($component) {
   $webform_node = node_load($component['nid']);
 
   // Create list of available tokens for formula description.
+  // Fixme: need to fetch fields from cache when in form_builder mode
   $available_components = array();
   foreach ($webform_node->webform['components'] as $node_component) {
     if (isset($allowed_component_types[$node_component['type']])) {
@@ -160,6 +161,7 @@ function _webform_edit_formula($component) {
     '#type' => 'textfield',
     '#title' => t('Formula value'),
     '#maxlength' => 1028,
+    '#required' => TRUE,
     '#default_value' => $component['value'],
     '#description' => "$element_description<br/>$allowed_operators_message<br/>$available_tokens_message<br/>$fieldset",
     '#weight' => -3,
@@ -242,6 +244,11 @@ function _webform_edit_formula_validate($element, &$element_state) {
     form_error($element, t('The formula syntax is invalid. !error', array('!error' => $e->getMessage())));
   }
 
+  if ($element_state['values']['form_id'] == 'form_builder_field_configure') {
+    // fixme - fetch fields from form_builder cache
+    return;
+  }
+
   $components_from_formula = webform_calculator_get_components_from_formula($original_formula);
   $webform_node = node_load($element_state['complete form']['nid']['#value']);
 
@@ -292,4 +299,32 @@ function _webform_csv_headers_formula($component, $export_options) {
  */
 function _webform_csv_data_formula($component, $export_options, $value) {
   return isset($value[0]) ? $value[0] : '';
+}
+
+
+/**
+ * Implements _webform_form_builder_map_component().
+ */
+function _webform_form_builder_map_formula() {
+  return array(
+    'form_builder_type' => 'formula',
+    'properties' => array(
+      'value' => array(
+        'form_parents' => array('value'),
+        'storage_parents' => array('value'),
+      ),
+      'hidden' => array(
+        'form_parents' => array('display', 'hidden'),
+        'storage_parents' => array('extra', 'hidden'),
+      ),
+      'precision' => array(
+        'form_parents' => array('display', 'precision'),
+        'storage_parents' => array('extra', 'precision'),
+      ),
+      'error_message' => array(
+        'form_parents' => array('display', 'error_message'),
+        'storage_parents' => array('extra', 'error_message'),
+      ),
+    ),
+  );
 }
