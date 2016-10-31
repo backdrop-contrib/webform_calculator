@@ -5,6 +5,9 @@
  * Webform Calculator formula component.
  */
 
+// Workaround for https://www.drupal.org/node/2814119
+module_load_include('inc', 'webform', 'components/number');
+
 /**
  * Implements _webform_defaults_component().
  */
