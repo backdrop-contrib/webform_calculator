@@ -12,10 +12,11 @@ function webform_calculator_webform_component_info() {
     'label' => t('Formula'),
     'description' => t('Computes values of other fields.'),
     'features' => array(
-        'required' => FALSE,
-      ),
+      'required' => FALSE,
+    ),
     'file' => 'components/formula.inc',
-    );
+    'conditional_type' => 'numeric',
+  );
 
   return $components;
 }
