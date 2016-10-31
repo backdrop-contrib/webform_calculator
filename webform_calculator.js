@@ -70,10 +70,6 @@
             function() {return this.checked ? this.value : undefined;}
         ).get();
       }
-      // Formula
-      componentValue = componentValue ||
-        $('#formula-component-' + componentKey).text();
-
       // Care for array
       if (componentValue && componentValue instanceof Array) {
         // Convert to number if possible
@@ -94,23 +90,19 @@
       }
     });
 
-    var formulaComponentElement = $('#formula-component-' + formulaComponent.form_key);
+    var formulaComponentElement = $('input[name$="[' + formulaComponent.form_key + ']"]');
 
     if (invalidFields.length > 0) {
       invalidFields = Drupal.webformCalculator.unique(invalidFields);
       // Set message.
-      var message = formulaComponent.extra.error_message || Drupal.t('Enter correct value for %fields to see result.', {'%fields': invalidFields.join(', ')});
-      formulaComponentElement.html(message);
-      // Hide prefix and suffix.
-      formulaComponentElement.parent().find('.field-prefix, .field-suffix').hide();
+      var message = formulaComponent.extra.error_message || Drupal.t('Enter correct value for !fields to see result.', {'!fields': invalidFields.join(', ')});
+      formulaComponentElement.attr('placeholder', message).val('').change();
     }
     else {
       // Set result.
       var formulaResult = eval(formulaReplaced);
       formulaResult = Drupal.webformCalculator.round(formulaResult, formulaComponent.extra.precision);
-      formulaComponentElement.text(formulaResult);
-      // Show prefix and suffix.
-      formulaComponentElement.parent().find('.field-prefix, .field-suffix').show();
+      formulaComponentElement.removeAttr('placeholder').val(formulaResult).change();
     }
   };
 

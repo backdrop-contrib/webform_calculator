@@ -16,6 +16,7 @@ function _webform_defaults_formula() {
     'weight' => 0,
     'value' => '',
     'extra' => array(
+      'width' => '',
       'field_prefix' => '',
       'field_suffix' => '',
       'title_display' => 0,
@@ -39,9 +40,6 @@ function _webform_defaults_formula() {
 function _webform_theme_formula() {
   return array(
     'webform_calculator_formula_display' => array(
-      'render element' => 'element',
-    ),
-    'webform_calculator_formula_form' => array(
       'render element' => 'element',
     ),
   );
@@ -70,32 +68,35 @@ function _webform_display_formula($component, $value, $format = 'html') {
 }
 
 /**
- * Theme function for formula displayed on webform view.
- */
-function theme_webform_calculator_formula_form($variables) {
-  $component = $variables['component'];
-  return '<span id="formula-component-' . $component['form_key'] . '">' . $component['value'] . '</span>';
-}
-
-/**
  * Implements _webform_render_component().
  */
 function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
   $element = array(
-    '#printed' => $component['extra']['hidden'],
-    '#type' => 'markup',
-    '#title' => $filter ? webform_filter_xss($component['name']) : $component['name'],
-    '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
-    '#weight' => $component['weight'],
-    '#field_prefix' => empty($component['extra']['field_prefix']) ? NULL : ($filter ? webform_filter_xss($component['extra']['field_prefix']) : $component['extra']['field_prefix']),
-    '#field_suffix' => empty($component['extra']['field_suffix']) ? NULL : ($filter ? webform_filter_xss($component['extra']['field_suffix']) : $component['extra']['field_suffix']),
-    '#description' => $filter
-      ? webform_filter_descriptions($component['extra']['description'])
-      : $component['extra']['description'],
-    '#markup' => theme('webform_calculator_formula_form', array('component' => $component)),
-    '#translatable' => array('title', 'description'),
     '#theme_wrappers' => array('webform_element'),
+    '#weight' => $component['weight'],
   );
+  if (!$component['extra']['hidden']) {
+    $element += array(
+      '#type' => 'textfield',
+      '#attributes' => array('readonly' => TRUE),
+      '#title' => $filter ? webform_filter_xss($component['name']) : $component['name'],
+      '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
+      '#field_prefix' => empty($component['extra']['field_prefix']) ? NULL : ($filter ? webform_filter_xss($component['extra']['field_prefix']) : $component['extra']['field_prefix']),
+      '#field_suffix' => empty($component['extra']['field_suffix']) ? NULL : ($filter ? webform_filter_xss($component['extra']['field_suffix']) : $component['extra']['field_suffix']),
+      '#description' => $filter
+        ? webform_filter_descriptions($component['extra']['description'])
+        : $component['extra']['description'],
+      '#translatable' => array('title', 'description'),
+    );
+
+    // Change the 'width' option to the correct 'size' option.
+    if ($component['extra']['width'] > 0) {
+      $element['#size'] = $component['extra']['width'];
+    }
+  }
+  else {
+    $element['#type'] = 'hidden';
+  }
   $element['#attached']['js'][] = array(
     'type' => 'setting',
     'data' => array(
@@ -180,6 +181,16 @@ function _webform_edit_formula($component) {
     '#size' => 20,
     '#maxlength' => 127,
     '#parents' => array('extra', 'field_suffix'),
+  );
+
+  $form['display']['width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width'),
+    '#default_value' => $component['extra']['width'],
+    '#description' => t('Width of the textfield.') . ' ' . t('Leaving blank will use the default size.'),
+    '#size' => 5,
+    '#maxlength' => 10,
+    '#parents' => array('extra', 'width'),
   );
 
   $form['display']['error_message'] = array(
