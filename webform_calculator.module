@@ -191,9 +191,8 @@ function webform_calculator_form_builder_element_types($form_type, $form_id) {
       ),
     );
     if (function_exists('_form_builder_webform_default')) {
-      $fields['formula']['default'] = _form_builder_webform_default('formula');
+      $fields['formula']['default'] = _form_builder_webform_default('formula', array(), array('name' => t('New formula')));
     }
-    $fields['autocomplete']['default']['#title'] = t('New formula');
 
     return $fields;
   }
