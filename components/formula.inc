@@ -158,10 +158,10 @@ function _webform_edit_formula($component) {
   $available_tokens_message = t('Example: %example', array('%example' => $example_formula));
 
   $form['value'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('Formula value'),
-    '#maxlength' => 1028,
     '#required' => TRUE,
+    '#rows' => 3,
     '#default_value' => $component['value'],
     '#description' => "$element_description<br/>$allowed_operators_message<br/>$available_tokens_message<br/>$fieldset",
     '#weight' => -3,
@@ -233,6 +233,12 @@ function _webform_edit_formula($component) {
 function _webform_edit_formula_validate($element, &$element_state) {
   $original_formula = $formula = $element['#value'];
   $formula = $element['#value'];
+
+  // Verify that the value is not longer than 1028 characters.
+  if (drupal_strlen($formula) > 1028) {
+    form_error($element, t('!name cannot be longer than %max characters but is currently %length characters long.', 
+      array('!name' => $element['#title'], '%max' => 1028, '%length' => drupal_strlen($formula))));
+  }
 
   // Replace elements in {}.
   $formula = preg_replace(WEBFORM_CALCULATOR_REGEX, 0, $formula);
