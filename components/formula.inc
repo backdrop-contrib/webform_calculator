@@ -131,8 +131,9 @@ function _webform_edit_formula($component) {
   // Create list of available tokens for formula description.
   // Fixme: need to fetch fields from cache when in form_builder mode
   $available_components = array();
+  $cid = isset($component['cid']) ? $component['cid'] : NULL;
   foreach ($webform_node->webform['components'] as $node_component) {
-    if (isset($allowed_component_types[$node_component['type']])) {
+    if (isset($allowed_component_types[$node_component['type']]) && $node_component['cid'] != $cid) {
       $available_components[] = '{' . $node_component['form_key'] . '} — ' . $node_component['name'];
     }
   }
