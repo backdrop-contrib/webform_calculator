@@ -5,8 +5,8 @@
  * Webform Calculator formula component.
  */
 
-// Workaround for https://www.drupal.org/node/2814119
-module_load_include('inc', 'webform', 'components/number');
+// Needed for conditional rules and component display
+webform_component_include('number');
 
 /**
  * Implements _webform_defaults_component().
@@ -59,7 +59,6 @@ function theme_webform_calculator_formula_display($variables) {
  * Implements _webform_display_component().
  */
 function _webform_display_formula($component, $value, $format = 'html') {
-  webform_component_include('number');
   $component['extra']['decimals'] = NULL;
   $component['extra']['point'] = '.';
   $component['extra']['separator'] = ',';
