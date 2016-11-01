@@ -71,12 +71,12 @@
       // Care for array
       if (componentValue && componentValue instanceof Array) {
         // Convert to number if possible
-        componentValue = componentValue.map(function (a) {return parseFloat(a) || 0;});
+        componentValue = componentValue.map(function (a) {return parseFloat(a);});
         // Summarize
-        componentValue = componentValue.length ? componentValue.reduce(function (a, b) {return a + b;}) : 0;
+        componentValue = componentValue.length ? componentValue.reduce(function (a, b) {return isNaN(a) || isNaN(b) ? NaN : a + b;}) : '';
       }
 
-      if (isNaN(componentValue) || componentValue == '') {
+      if (isNaN(componentValue) || componentValue === '') {
         var label =  $('label[for$=-' + componentKey.replace('_', '-') + ']').text().trim();
         if (label == '') {
           label = componentKey;
