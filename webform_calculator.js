@@ -77,7 +77,7 @@
       }
 
       if (isNaN(componentValue) || componentValue === '') {
-        var label =  $('label[for$=-' + componentKey.replace('_', '-') + ']').text().trim();
+        var label =  $('label[for$=-' + componentKey.replace(/_/g, '-') + ']').text().trim();
         if (label == '') {
           label = componentKey;
         }
