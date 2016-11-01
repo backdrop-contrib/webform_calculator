@@ -4,16 +4,15 @@
     attach: function(context, settings) {
       Drupal.webformCalculator.evaluateAllFormulas();
 
-      for (var index in settings.webformCalculator) {
-        var component = settings.webformCalculator[index];
+      $.each(settings.webformCalculator, function(index, component) {
         var elements = Drupal.webformCalculator.getComponentsKeys(component);
 
-        $(elements).each(function(index, componentKey) {
-          var handler = function (event) {
-            Drupal.webformCalculator.evaluateAllFormulas();
+        $(elements).each(function(i, componentKey) {
+          var handler = function () {
+            Drupal.webformCalculator.evaluateFormula(component);
           };
           var selector = ''
-                  + 'input:text[name$="[' + componentKey + ']"]' // Number, Single select
+                  + 'input[name$="[' + componentKey + ']"]' // Number, Single select
                   + ', '
                   + 'select[name$="[' + componentKey + ']"]' // Number, Single select
                   + ', '
@@ -24,14 +23,13 @@
                   + '#edit-submitted-' + componentKey + ' input:checkbox' // Checkboxes
                   ;
 
-
           $(selector, context)
-              .unbind('change', handler).bind('change', handler) // Something changed
-              .unbind('keyup', handler).bind('keyup', handler) // Even before we leave input element
-              .unbind('mouseup', handler).bind('mouseup', handler) // Also care for paste context menu
+            .bind('change', handler) // Something changed
+            .bind('keyup', handler) // Even before we leave input element
+            .bind('mouseup', handler) // Also care for paste context menu
           ;
         });
-      }
+      });
     }
   };
 
@@ -108,10 +106,9 @@
 
   // Evaluate all formulas.
   Drupal.webformCalculator.evaluateAllFormulas = function() {
-    for (var index in Drupal.settings.webformCalculator) {
-      var component = Drupal.settings.webformCalculator[index];
+    $.each(Drupal.settings.webformCalculator, function(i, component) {
       Drupal.webformCalculator.evaluateFormula(component);
-    }
+    });
   };
 
   // Get unique elements from array.
