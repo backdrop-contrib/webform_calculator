@@ -118,7 +118,7 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
  * Reusable constant.
  */
 function _webform_calculator_allowed_component_types() {
-  return array('number' => 1, 'formula' => 1, 'select' => 1);
+  return array('number' => 1, 'formula' => 1, 'select' => 1, 'grid' => 1);
 }
 
 /**

@@ -18,7 +18,7 @@
                   + ', '
                   + 'select[name$="[' + componentKey + '][]"]'// Multiple select
                   + ', '
-                  + 'input:radio[name$="[' + componentKey + ']"]'// Radios
+                  + 'input:radio[name*="[' + componentKey + ']"]'// Radios, grid
                   + ', '
                   + '#edit-submitted-' + componentKey + ' input:checkbox' // Checkboxes
                   ;
@@ -60,7 +60,7 @@
       // Radios and checkboxes (provides array but only if exists)
       var checkables = $('#edit-submitted-' + componentKey + ' input:checkbox'
       + ', '
-      + 'input:radio[name$="[' + componentKey + ']"]'
+      + 'input:radio[name*="[' + componentKey + ']"]'
       );
       if (checkables.length > 0) {
         componentValue = componentValue ||
@@ -71,7 +71,7 @@
       // Care for array
       if (componentValue && componentValue instanceof Array) {
         // Convert to number if possible
-        componentValue = componentValue.map(function (a) {return parseFloat(a) || a;});
+        componentValue = componentValue.map(function (a) {return parseFloat(a) || 0;});
         // Summarize
         componentValue = componentValue.length ? componentValue.reduce(function (a, b) {return a + b;}) : 0;
       }
