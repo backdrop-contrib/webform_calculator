@@ -125,18 +125,8 @@ function _webform_calculator_allowed_component_types() {
  * Implements _webform_edit_component().
  */
 function _webform_edit_formula($component) {
-  $allowed_component_types = _webform_calculator_allowed_component_types();
-  $webform_node = node_load($component['nid']);
+  $available_components = _webform_calculator_get_tokens($component);
 
-  // Create list of available tokens for formula description.
-  // Fixme: need to fetch fields from cache when in form_builder mode
-  $available_components = array();
-  $cid = isset($component['cid']) ? $component['cid'] : NULL;
-  foreach ($webform_node->webform['components'] as $node_component) {
-    if (isset($allowed_component_types[$node_component['type']]) && $node_component['cid'] != $cid) {
-      $available_components[] = '{' . $node_component['form_key'] . '} — ' . $node_component['name'];
-    }
-  }
   $replacements = theme('item_list', array('title' => t('Available replacement tokens'), 'items' => $available_components));
   $fieldset = array(
     '#title' => t('Token values'),
@@ -248,29 +238,18 @@ function _webform_edit_formula_validate($element, &$element_state) {
   }
   catch (Exception $e) {
     form_error($element, t('The formula syntax is invalid. !error', array('!error' => $e->getMessage())));
-  }
-
-  if ($element_state['values']['form_id'] == 'form_builder_field_configure') {
-    // fixme - fetch fields from form_builder cache
     return;
   }
 
+  // In form_buider_webform context it's tricky to get the nid & cid, normally it's in the values
+  $component = isset($element_state['complete form']['#_edit_element']) ? $element_state['complete form']['#_edit_element']['#webform_component'] : $element_state['values'];
+
+  $allowed_tokens = _webform_calculator_get_tokens($component);
   $components_from_formula = webform_calculator_get_components_from_formula($original_formula);
-  $webform_node = node_load($element_state['complete form']['nid']['#value']);
 
-  // Get webform components keyed by form key.
-  $components_by_key = array();
-  foreach ($webform_node->webform['components'] as $component) {
-    $components_by_key[$component['form_key']] = $component;
-  }
-
-  $allowed_component_types = _webform_calculator_allowed_component_types();
   foreach ($components_from_formula as $component_key) {
-    if (!isset($components_by_key[$component_key])) {
-      form_error($element, t('Webform component %component does not exist.', array('%component' => $component_key)));
-    }
-    elseif (!isset($allowed_component_types[$components_by_key[$component_key]['type']])) {
-      form_error($element, t('Entered component %component is not numeric type.', array('%component' => $component_key)));
+    if (!isset($allowed_tokens[$component_key])) {
+      form_error($element, t('Invalid token %key.', array('%key' => '{' . $component_key . '}')));
     }
   }
 }
@@ -305,6 +284,34 @@ function _webform_csv_headers_formula($component, $export_options) {
  */
 function _webform_csv_data_formula($component, $export_options, $value) {
   return isset($value[0]) ? $value[0] : '';
+}
+
+/**
+ * Create list of available tokens for formula description.
+ *
+ * @param $component
+ * @return array
+ */
+function _webform_calculator_get_tokens($component) {
+  $allowed_component_types = _webform_calculator_allowed_component_types();
+  $webform_node = node_load($component['nid']);
+
+  if (module_exists('form_builder_webform') && class_exists('FormBuilderLoader') && arg(2) == 'form-builder' && arg(4) == 'webform') {
+    $cachedForm = FormBuilderLoader::instance()->fromCache('webform', $component['nid']);
+    $all_components = $cachedForm->getComponents($webform_node);
+  }
+  else {
+    $all_components = $webform_node->webform['components'];
+  }
+
+  $available_components = array();
+  $cid = isset($component['cid']) ? $component['cid'] : NULL;
+  foreach ($all_components as $node_component) {
+    if (isset($allowed_component_types[$node_component['type']]) && (empty($node_component['cid']) || $node_component['cid'] != $cid)) {
+      $available_components[$node_component['form_key']] = '{' . $node_component['form_key'] . '} — ' . $node_component['name'];
+    }
+  }
+  return $available_components;
 }
 
 
