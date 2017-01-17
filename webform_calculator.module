@@ -44,7 +44,9 @@ function webform_calculator_webform_submission_presave($node, &$submission) {
  *   Calculated value for given formula.
  */
 function webform_calculator_eval($formula, $precision = 1) {
-  eval("\$result = $formula;");
+  module_load_include('php', 'webform_calculator', 'matheval.class');
+  $parser = new WebformEvalMath();
+  $result = $parser->evaluate($formula);
   return round($result, $precision);
 }
 
@@ -110,56 +112,11 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
   }
 
   try  {
-    webform_calculator_validate_php($formula);
     return webform_calculator_eval($formula, $formula_component['extra']['precision']);
   }
   catch (Exception $e) {
     watchdog_exception('webform_calculator', $e);
     return 0;
-  }
-}
-
-/**
- * Validate if code that will be used with eval is secure and valid.
- *
- * @param $code
- *   PHP code to check.
- *
- * @return bool
- *   TRUE if code is valid, FALSE otherwise.
- *
- * @throws Exception
- */
-function webform_calculator_validate_php($code) {
-  $allowed_tokens = array(T_LNUMBER, T_DNUMBER, T_WHITESPACE);
-  $allowed_chars = array('+', '-', '*', '/', '(', ')', '%');
-
-  $tokens = token_get_all('<?php ' . $code);
-  // Remove opening php tag.
-  array_shift($tokens);
-
-  foreach ($tokens as $token) {
-    // Checking for allowed characters.
-    if (is_string($token)) {
-      if (!in_array($token, $allowed_chars)) {
-        throw new Exception(t('Disallowed character %char was used.', array('%char' => $token)));
-      }
-      continue;
-    }
-    // Checking for allowed tokens.
-    if (!in_array($token[0], $allowed_tokens)) {
-      throw new Exception(t('Using %token is disallowed.', array('%token' => token_name($token[0]))));
-    }
-  }
-
-  // Check PHP syntax.
-  ob_start();
-  if (@eval("\$return_array = $code;") === FALSE) {
-    throw new Exception(t('Error occurred while parsing code.'));
-  }
-  else {
-    ob_end_clean();
-    return TRUE;
   }
 }
 

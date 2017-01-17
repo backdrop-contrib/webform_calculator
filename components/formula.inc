@@ -110,6 +110,10 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
     'type' => 'file',
     'data' => drupal_get_path('module', 'webform_calculator') . '/webform_calculator.js',
   );
+  $element['#attached']['js'][] = array(
+    'type' => 'file',
+    'data' => drupal_get_path('module', 'webform_calculator') . '/parser.js',
+  );
 
   return $element;
 }
@@ -125,6 +129,7 @@ function _webform_calculator_allowed_component_types() {
  * Implements _webform_edit_component().
  */
 function _webform_edit_formula($component) {
+  module_load_include('php', 'webform_calculator', 'matheval.class');
   $available_components = _webform_calculator_get_tokens($component);
 
   $replacements = theme('item_list', array('title' => t('Available replacement tokens'), 'items' => $available_components));
@@ -141,11 +146,15 @@ function _webform_edit_formula($component) {
   $form = array();
 
   // Create description for formula value.
-  $element_description = t('Enter the calculation formula with components in brackets.');
-  $allowed_operators = '+, -, *, /, (, ), %, ?, :, <, >, <=, >=, ==, &&, ||';
-  $allowed_operators_message = t('Allowed operators: %operators', array('%operators' => $allowed_operators));
-  $example_formula = '{component1} + {component2} / {component3}';
-  $available_tokens_message = t('Example: %example', array('%example' => $example_formula));
+  $parser = new WebformEvalMath();
+  $example_tokens = array_keys($available_components) + array('a', 'b', 'c');
+  $description = array('<em>' . t('Enter the calculation formula with components in brackets.') . '</em>');
+  $allowed_operators = array('+', '-', '*', '/', '^', '_');
+  $description[] = '<strong>' . t('Operators:') . '</strong> ' . implode(', ', $allowed_operators);
+  $description[] = '<strong>' . t('Constants:') . '</strong> ' . implode(', ', $parser->vb);
+  $description[] = '<strong>' . t('Functions:') . '</strong> ' . implode(', ', $parser->fb);
+  $description[] = '<strong>' . t('Example:') . "</strong> ({{$example_tokens[0]}} + {{$example_tokens[1]}}) ^ {{$example_tokens[2]}}";
+
 
   $form['value'] = array(
     '#type' => 'textarea',
@@ -153,8 +162,9 @@ function _webform_edit_formula($component) {
     '#required' => TRUE,
     '#rows' => 3,
     '#default_value' => $component['value'],
-    '#description' => "$element_description<br/>$allowed_operators_message<br/>$available_tokens_message<br/>$fieldset",
+    '#description' => implode('<br />', $description) . "<br/>$fieldset",
     '#weight' => -3,
+    '#attributes' => array('placeholder' => "{{$example_tokens[0]}} + {{$example_tokens[1]}}"),
     '#element_validate' => array('_webform_edit_formula_validate'),
   );
 
@@ -231,10 +241,10 @@ function _webform_edit_formula_validate($element, &$element_state) {
   }
 
   // Replace elements in {}.
-  $formula = preg_replace(WEBFORM_CALCULATOR_REGEX, 0, $formula);
+  $formula = preg_replace(WEBFORM_CALCULATOR_REGEX, '(1)', $formula);
 
   try {
-    webform_calculator_validate_php($formula);
+    webform_calculator_eval($formula);
   }
   catch (Exception $e) {
     form_error($element, t('The formula syntax is invalid. !error', array('!error' => $e->getMessage())));

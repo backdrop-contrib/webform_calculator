@@ -98,7 +98,8 @@
     }
     else {
       // Set result.
-      var formulaResult = eval(formulaReplaced);
+      var parser = new Drupal.WebformCalculatorParser();
+      var formulaResult = parser.evaluate(formulaReplaced, {pi: Math.PI, e: Math.E});
       formulaResult = Drupal.webformCalculator.round(formulaResult, formulaComponent.extra.precision);
       formulaComponentElement.removeAttr('placeholder').val(formulaResult).change();
     }
