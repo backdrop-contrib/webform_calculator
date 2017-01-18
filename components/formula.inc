@@ -247,8 +247,11 @@ function _webform_edit_formula_validate($element, &$element_state) {
     webform_calculator_eval($formula);
   }
   catch (Exception $e) {
-    form_error($element, t('The formula syntax is invalid. !error', array('!error' => $e->getMessage())));
-    return;
+    // Div by zero isn't a syntax error, might have just been caused by our arbitrary variable substitution
+    if ($e->getMessage() != 'division by zero') {
+      form_error($element, t('The formula syntax is invalid. !error', array('!error' => $e->getMessage())));
+      return;
+    }
   }
 
   // In form_buider_webform context it's tricky to get the nid & cid, normally it's in the values
