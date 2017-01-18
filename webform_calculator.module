@@ -30,6 +30,12 @@ function webform_calculator_webform_submission_presave($node, &$submission) {
       $submission->data[$component['cid']][0] = webform_calculator_replace_formula_values($component, $node, $submission);
     }
   }
+  // Do the exact same thing again, in case we missed any calculated fields that were dependent on other calculated fields.
+  foreach ($node->webform['components'] as $component) {
+    if ($component['type'] == 'formula') {
+      $submission->data[$component['cid']][0] = webform_calculator_replace_formula_values($component, $node, $submission);
+    }
+  }
 }
 
 /**
