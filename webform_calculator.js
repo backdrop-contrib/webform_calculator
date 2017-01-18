@@ -1,5 +1,13 @@
 (function($) {
 
+  function pf(num) {
+    if (typeof num === 'string') {
+      num = num.replace(/,/g, '');
+    }
+    num = parseFloat(num);
+    return isNaN(num) ? null : num;
+  }
+
   Drupal.behaviors.webformCalculator = {
     attach: function(context, settings) {
       Drupal.webformCalculator.evaluateAllFormulas();
@@ -47,36 +55,37 @@
 
     var invalidFields = [];
     $(elements).each(function(index, componentKey) {
-      var componentValue;
       // Number
-      componentValue = componentValue ||
-        $('input:text[name$="[' + componentKey + ']"]').val();
+      var componentValue = pf($('input:text[name$="[' + componentKey + ']"]').val());
       // Single select
-      componentValue = componentValue ||
-        $('select[name$="[' + componentKey + ']"]').val();
+      if (componentValue === null) {
+        componentValue = pf($('select[name$="[' + componentKey + ']"]').val());
+      }
       // Multiple select (provides array if exists)
-      componentValue = componentValue ||
-        $('select[name$="[' + componentKey + '][]"]').val();
+      if (componentValue === null) {
+        componentValue = $('select[name$="[' + componentKey + '][]"]').val() || null;
+      }
       // Radios and checkboxes (provides array but only if exists)
-      var checkables = $('#edit-submitted-' + componentKey + ' input:checkbox'
-      + ', '
-      + 'input:radio[name*="[' + componentKey + ']"]'
-      );
-      if (checkables.length > 0) {
-        componentValue = componentValue ||
-        checkables.map(
-            function() {return this.checked ? this.value : undefined;}
-        ).get();
+      if (componentValue === null) {
+        var checkables = $('#edit-submitted-' + componentKey + ' input:checkbox, input:radio[name*="[' + componentKey + ']"]');
+        if (checkables.length > 0) {
+          componentValue = componentValue ||
+            checkables.map(
+              function () {
+                return this.checked ? this.value : null;
+              }
+            ).get();
+        }
       }
       // Care for array
-      if (componentValue && componentValue instanceof Array) {
+      if (componentValue instanceof Array) {
         // Convert to number if possible
-        componentValue = componentValue.map(function (a) {return parseFloat(a);});
+        componentValue = componentValue.map(pf);
         // Summarize
-        componentValue = componentValue.length ? componentValue.reduce(function (a, b) {return isNaN(a) || isNaN(b) ? NaN : a + b;}) : '';
+        componentValue = componentValue.length ? componentValue.reduce(function (a, b) {return a === null || b === null ? 0 : a + b;}, 0) : null;
       }
 
-      if (isNaN(componentValue) || componentValue === '') {
+      if (componentValue === null) {
         var label =  $('label[for$=-' + componentKey.replace(/_/g, '-') + ']').text().trim();
         if (label == '') {
           label = componentKey;
