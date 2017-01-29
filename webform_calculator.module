@@ -39,21 +39,29 @@ function webform_calculator_webform_submission_presave($node, &$submission) {
 }
 
 /**
- * Evaluate math formula.
+ * Evaluate math formula and format result.
  *
  * @param $formula
  *   Mathematical formula (without tokens).
  * @param int $precision
  *   Round precision.
+ * @param string $separator
+ * @param string $point
  *
- * @return float
- *   Calculated value for given formula.
+ * @return float Calculated value for given formula.
+ * Calculated value for given formula.
  */
-function webform_calculator_eval($formula, $precision = 1) {
+function webform_calculator_eval($formula, $precision = 1, $separator = '', $point = '.') {
   module_load_include('php', 'webform_calculator', 'matheval.class');
   $parser = new WebformEvalMath();
   $result = $parser->evaluate($formula);
-  return round($result, $precision);
+  $result = (string) round($result, $precision);
+  if ($separator || $point != '.') {
+    $pieces = explode($point, $result);
+    $pieces[0] = number_format($pieces[0], 0, '.', $separator);
+    $result = implode($point, $pieces);
+  }
+  return $result;
 }
 
 /**

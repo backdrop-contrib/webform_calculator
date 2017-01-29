@@ -1,11 +1,29 @@
 (function($) {
 
-  function pf(num) {
+  // Parse float according to display preferences
+  function pf(num, separator, point) {
     if (typeof num === 'string') {
-      num = num.replace(/,/g, '');
+      num = num.split(separator).join('');
+      if (point && point !== '.') {
+        num = num.replace(point, '.');
+      }
+      num = num.replace(/ /g, '');
     }
     num = parseFloat(num);
     return isNaN(num) ? null : num;
+  }
+
+  // Round and format number according to display preferences
+  function formatNumber(number, places, sep, point) {
+    var multiplier = Math.pow(10, places),
+      result = (Math.round(number * multiplier) / multiplier).toString();
+    if (point && point !== '.') {
+      result = result.replace('.', point);
+    }
+    if (sep) {
+      result = result.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+    }
+    return result;
   }
 
   Drupal.behaviors.webformCalculator = {
@@ -56,10 +74,10 @@
     var invalidFields = [];
     $(elements).each(function(index, componentKey) {
       // Number
-      var componentValue = pf($('input:text[name$="[' + componentKey + ']"]').val());
+      var componentValue = pf($('input:text[name$="[' + componentKey + ']"]').val(), formulaComponent.extra.separator, formulaComponent.extra.point);
       // Single select
       if (componentValue === null) {
-        componentValue = pf($('select[name$="[' + componentKey + ']"]').val());
+        componentValue = pf($('select[name$="[' + componentKey + ']"]').val(), formulaComponent.extra.separator, formulaComponent.extra.point);
       }
       // Multiple select (provides array if exists)
       if (componentValue === null) {
@@ -80,7 +98,9 @@
       // Care for array
       if (componentValue instanceof Array) {
         // Convert to number if possible
-        componentValue = componentValue.map(pf);
+        componentValue = componentValue.map(function(val) {
+          return pf(val, formulaComponent.extra.separator, formulaComponent.extra.point);
+        });
         // Summarize
         componentValue = componentValue.length ? componentValue.reduce(function (a, b) {return a === null || b === null ? 0 : a + b;}, 0) : null;
       }
@@ -109,7 +129,7 @@
       // Set result.
       var parser = new Drupal.WebformCalculatorParser();
       var formulaResult = parser.evaluate(formulaReplaced, {pi: Math.PI, e: Math.E});
-      formulaResult = Drupal.webformCalculator.round(formulaResult, formulaComponent.extra.precision);
+	    formulaResult = formatNumber(formulaResult, formulaComponent.extra.precision, formulaComponent.extra.separator, formulaComponent.extra.point);
       formulaComponentElement.removeAttr('placeholder').val(formulaResult).change();
     }
   };
@@ -133,11 +153,5 @@
     }
     return a;
   };
-
-  // Round result of calculation.
-  Drupal.webformCalculator.round = function(number, places) {
-    var multiplier = Math.pow(10, places);
-    return (Math.round(number * multiplier) / multiplier);
-  }
 
 })(jQuery);

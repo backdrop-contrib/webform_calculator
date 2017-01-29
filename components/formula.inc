@@ -26,10 +26,8 @@ function _webform_defaults_formula() {
       'description' => '',
       'private' => FALSE,
       // TODO 'analysis' => FALSE,
-      // TODO 'decimals' => '',
-      // TODO 'point' => '.',
-      // TODO 'separator' => ',',
-      // TODO 'excludezero' => 0,
+      'point' => '.',
+      'separator' => ',',
       'precision' => 1,
       'hidden' => FALSE,
       'error_message' => '',
@@ -60,12 +58,10 @@ function theme_webform_calculator_formula_display($variables) {
  */
 function _webform_display_formula($component, $value, $format = 'html') {
   $component['extra']['decimals'] = NULL;
-  $component['extra']['point'] = '.';
-  $component['extra']['separator'] = ',';
 
   $element = _webform_display_number($component, $value, $format);
   $element['#theme'] = 'webform_calculator_formula_display';
-  $element['#value'] = isset($value[0]) ? $value[0] : '';
+  $element['#value'] = isset($value[0]) ? _webform_number_format($component, $value[0]) : '';
   return $element;
 }
 
@@ -215,6 +211,23 @@ function _webform_edit_formula($component) {
     '#parents' => array('extra', 'precision'),
   );
 
+  $form['display']['separator'] = array(
+    '#type' => 'select',
+    '#title' => t('Thousands separator'),
+    '#default_value' => $component['extra']['separator'],
+    '#options' => array(',' => t('Comma (,)'), '.' => t('Period (.)'), ' ' => t('Space ( )'), '' => t('None')),
+    '#parents' => array('extra', 'separator'),
+  );
+
+  $form['display']['point'] = array(
+    '#type' => 'select',
+    '#title' => t('Decimal point'),
+    '#default_value' => $component['extra']['point'],
+    '#options' => array(',' => t('Comma (,)'), '.' => t('Period (.)')),
+    '#parents' => array('extra', 'point'),
+    '#element_validate' => array('_webform_edit_separator_point_validate'),
+  );
+
   $form['display']['hidden'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hidden'),
@@ -228,9 +241,21 @@ function _webform_edit_formula($component) {
 }
 
 /**
+ * Element validate handler; Check the separator and decimal point value.
+ */
+function _webform_edit_separator_point_validate($element, &$element_state) {
+  if (!empty($element_state['values']['extra']['separator'])) {
+    if ($element_state['values']['extra']['point'] === $element_state['values']['extra']['separator']) {
+      form_error($element, t('The decimal point and the thousands separator could not be the same.'));
+    }
+  }
+}
+
+/**
  * Element validate handler; Set the precision value.
  */
 function _webform_edit_formula_validate($element, &$element_state) {
+
   $original_formula = $formula = $element['#value'];
   $formula = $element['#value'];
 
@@ -346,6 +371,14 @@ function _webform_form_builder_map_formula() {
       'precision' => array(
         'form_parents' => array('display', 'precision'),
         'storage_parents' => array('extra', 'precision'),
+      ),
+      'point' => array(
+        'form_parents' => array('display', 'point'),
+        'storage_parents' => array('extra', 'point'),
+      ),
+      'separator' => array(
+        'form_parents' => array('display', 'separator'),
+        'storage_parents' => array('extra', 'separator'),
       ),
       'error_message' => array(
         'form_parents' => array('display', 'error_message'),
