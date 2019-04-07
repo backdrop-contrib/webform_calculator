@@ -95,6 +95,14 @@
             ).get();
         }
       }
+
+      // Get value from previous page submission.
+      if (componentValue === null) {
+        if (typeof Drupal.settings.webformCalculatorData[componentKey] != null) {
+          componentValue = Drupal.settings.webformCalculatorData[componentKey]; 
+        }
+      }
+
       // Care for array
       if (componentValue instanceof Array) {
         // Convert to number if possible
