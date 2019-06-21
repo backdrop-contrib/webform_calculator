@@ -239,6 +239,15 @@ function webform_calculator_form_calculate($form, &$form_state) {
   $submission = new stdClass;
   $submission->data = $form_state['storage']['submitted'];
 
+  // Also add current page submitted values - these are stored in $form_state['values']['submitted'].
+  foreach ($form_state['values']['submitted'] as $key => $submitted) {
+    foreach ($form_state['webform']['component_tree']['children'] as $child) {
+      if ($child['form_key'] == $key) {
+        $submission->data[$child['cid']] = array(0 => $submitted);
+      }
+    }
+  }
+
   // Run the calculation twice.
   webform_calculator_form_replace_formula_values($node, $submission, $form_state);
   webform_calculator_form_replace_formula_values($node, $submission, $form_state);
@@ -250,6 +259,10 @@ function webform_calculator_form_calculate($form, &$form_state) {
 function webform_calculator_form_replace_formula_values($node, $submission, &$form_state) {
   foreach ($node->webform['components'] as $component) {
     if ($component['type'] == 'formula') {
+
+      // Update both 'form_key' and 'cid' submit values.
+      $form_state['values']['submitted'][$component['form_key']] =
+        webform_calculator_replace_formula_values($component, $node, $submission);
       $form_state['values']['submitted'][$component['cid']] =
         webform_calculator_replace_formula_values($component, $node, $submission);
     }
