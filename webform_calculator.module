@@ -203,20 +203,20 @@ function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
   }
 
   // Make submitted values, which might be from previous pages, available to the js calculator.
+  $webform_calculator_data = array();
   if (!empty($form_state['storage']['submitted'])) {
-    $webform_calculator_data = array();
     foreach ($form_state['webform']['component_tree']['children'] as $cid => $component) {
       if (!empty($form_state['storage']['submitted'][$cid])) { 
         $webform_calculator_data[$component['form_key']] =  $form_state['storage']['submitted'][$cid];
       }
     }
-    $form['#attached']['js'][] = array(
-      'type' => 'setting',
-      'data' => array(
-        'webformCalculatorData' => $webform_calculator_data,
-      ),
-    );
   }
+  $form['#attached']['js'][] = array(
+    'type' => 'setting',
+    'data' => array(
+      'webformCalculatorData' => $webform_calculator_data,
+    ),
+  );
 
   // Calculate formulas on both validate and submit.
   $form['#validate'][] = 'webform_calculator_form_calculate';

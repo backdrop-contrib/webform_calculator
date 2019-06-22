@@ -97,10 +97,8 @@
       }
 
       // Get value from previous page submission.
-      if (componentValue === null) {
-        if (typeof Drupal.settings.webformCalculatorData[componentKey] != null) {
-          componentValue = Drupal.settings.webformCalculatorData[componentKey]; 
-        }
+      if (componentValue === null && componentKey in Drupal.settings.webformCalculatorData) {
+        componentValue = Drupal.settings.webformCalculatorData[componentKey]; 
       }
 
       // Care for array
