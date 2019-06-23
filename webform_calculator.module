@@ -120,7 +120,12 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
       $sum = 0;
       foreach ($values as $value) {
         if (!empty($value)) {
-          $sum += $value;
+          if (is_array($value)) {
+            $sum += array_shift($value);
+          }
+          else {
+            $sum += $value;
+          }
         }
       }
       $formula = str_replace('{' . $component_key . '}', '(' . $sum . ')', $formula);
