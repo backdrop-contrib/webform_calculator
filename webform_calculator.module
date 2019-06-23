@@ -206,8 +206,13 @@ function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
   $webform_calculator_data = array();
   if (!empty($form_state['storage']['submitted'])) {
     foreach ($form_state['webform']['component_tree']['children'] as $cid => $component) {
-      if (!empty($form_state['storage']['submitted'][$cid])) { 
+      // Numeric keys.
+      if (!empty($form_state['storage']['submitted'][$cid])) {
         $webform_calculator_data[$component['form_key']] =  $form_state['storage']['submitted'][$cid];
+      }
+      // Named keys.
+      if (!empty($form_state['storage']['submitted'][$component['form_key']])) { 
+        $webform_calculator_data[$component['form_key']] =  $form_state['storage']['submitted'][$component['form_key']];
       }
     }
   }
