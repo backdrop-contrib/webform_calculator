@@ -26,16 +26,16 @@
     return result;
   }
 
-  Drupal.behaviors.webformCalculator = {
+  Backdrop.behaviors.webformCalculator = {
     attach: function(context, settings) {
-      Drupal.webformCalculator.evaluateAllFormulas();
+      Backdrop.webformCalculator.evaluateAllFormulas();
 
       $.each(settings.webformCalculator, function(index, component) {
-        var elements = Drupal.webformCalculator.getComponentsKeys(component);
+        var elements = Backdrop.webformCalculator.getComponentsKeys(component);
 
         $(elements).each(function(i, componentKey) {
           var handler = function () {
-            Drupal.webformCalculator.evaluateFormula(component);
+            Backdrop.webformCalculator.evaluateFormula(component);
           };
           var selector = ''
                   + 'input[name$="[' + componentKey + ']"]' // Number, Single select
@@ -59,17 +59,17 @@
     }
   };
 
-  Drupal.webformCalculator = {};
+  Backdrop.webformCalculator = {};
 
   // Get keys of components that were used inside formula.
-  Drupal.webformCalculator.getComponentsKeys = function(formulaComponent) {
+  Backdrop.webformCalculator.getComponentsKeys = function(formulaComponent) {
     return formulaComponent.value.match(/[^{}]+(?=\})/g);
   };
 
   // Replace tokens from formula with numeric values from components.
-  Drupal.webformCalculator.evaluateFormula = function(formulaComponent) {
+  Backdrop.webformCalculator.evaluateFormula = function(formulaComponent) {
     var formulaReplaced = formulaComponent.value;
-    var elements = Drupal.webformCalculator.getComponentsKeys(formulaComponent);
+    var elements = Backdrop.webformCalculator.getComponentsKeys(formulaComponent);
 
     var invalidFields = [];
     $(elements).each(function(index, componentKey) {
@@ -120,14 +120,14 @@
     var formulaComponentElement = $('input[name$="[' + formulaComponent.form_key + ']"]');
 
     if (invalidFields.length > 0) {
-      invalidFields = Drupal.webformCalculator.unique(invalidFields);
+      invalidFields = Backdrop.webformCalculator.unique(invalidFields);
       // Set message.
-      var message = formulaComponent.extra.error_message || Drupal.t('Enter correct value for !fields to see result.', {'!fields': invalidFields.join(', ')});
+      var message = formulaComponent.extra.error_message || Backdrop.t('Enter correct value for !fields to see result.', {'!fields': invalidFields.join(', ')});
       formulaComponentElement.attr('placeholder', message).val('').change();
     }
     else {
       // Set result.
-      var parser = new Drupal.WebformCalculatorParser();
+      var parser = new Backdrop.WebformCalculatorParser();
       var formulaResult = parser.evaluate(formulaReplaced, {pi: Math.PI, e: Math.E});
 	    formulaResult = formatNumber(formulaResult, formulaComponent.extra.precision, formulaComponent.extra.separator, formulaComponent.extra.point);
       formulaComponentElement.removeAttr('placeholder').val(formulaResult).change();
@@ -135,14 +135,14 @@
   };
 
   // Evaluate all formulas.
-  Drupal.webformCalculator.evaluateAllFormulas = function() {
-    $.each(Drupal.settings.webformCalculator, function(i, component) {
-      Drupal.webformCalculator.evaluateFormula(component);
+  Backdrop.webformCalculator.evaluateAllFormulas = function() {
+    $.each(Backdrop.settings.webformCalculator, function(i, component) {
+      Backdrop.webformCalculator.evaluateFormula(component);
     });
   };
 
   // Get unique elements from array.
-  Drupal.webformCalculator.unique = function(array) {
+  Backdrop.webformCalculator.unique = function(array) {
      var u = {}, a = [];
      for (var i = 0, l = array.length; i < l; ++i) {
       if (u.hasOwnProperty(array[i])) {

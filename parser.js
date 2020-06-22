@@ -1345,6 +1345,6 @@
     return sharedParser.parse(expr).evaluate(variables);
   };
 
-  Drupal.WebformCalculatorParser = Parser;
-  Drupal.WebformCalculatorExpression = Expression;
+  Backdrop.WebformCalculatorParser = Parser;
+  Backdrop.WebformCalculatorExpression = Expression;
 })();

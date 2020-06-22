@@ -3,7 +3,7 @@
 define('WEBFORM_CALCULATOR_REGEX', '/\{\w+\}/');
 
 /**
- * Implements of hook_webform_component_info().
+ * Implements hook_webform_component_info().
  */
 function webform_calculator_webform_component_info() {
   $components = array();
@@ -83,7 +83,7 @@ function webform_calculator_theme() {
 function webform_calculator_get_components_from_formula($formula) {
   $components = array();
   if (preg_match_all(WEBFORM_CALCULATOR_REGEX, $formula, $matches)) {
-    foreach ((array)$matches[0] as $match) {
+    foreach ((array) $matches[0] as $match) {
       $components[] = str_replace(array('{', '}'), array('', ''), $match);
     }
   }
@@ -125,7 +125,7 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
     }
   }
 
-  try  {
+  try {
     return webform_calculator_eval($formula, $formula_component['extra']['precision']);
   }
   catch (Exception $e) {
@@ -142,7 +142,7 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
  */
 function webform_calculator_form_builder_element_types($form_type, $form_id) {
   if ($form_type == 'webform') {
-    drupal_add_css(drupal_get_path('module', 'webform_calculator') . '/formula.css');
+    backdrop_add_css(backdrop_get_path('module', 'webform_calculator') . '/formula.css');
     $fields = array(
       'formula' => array(
         'title' => t('Formula'),
@@ -176,5 +176,15 @@ function webform_calculator_form_builder_preview_alter(&$element, $form_type, $f
   if ($form_type == 'webform' && $element['#webform_component']['type'] == 'formula') {
     $element['#attributes']['placeholder'] = $element['#webform_component']['value'];
   }
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function webform_calculator_autoload_info() {
+  return array(
+    'WebformEvalMath' => 'matheval.class.php',
+    'WebformEvalMathStack' => 'matheval.class.php',
+  );
 }
 

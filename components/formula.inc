@@ -50,6 +50,7 @@ function _webform_theme_formula() {
  * Format the output of data for this component.
  */
 function theme_webform_calculator_formula_display($variables) {
+  // TODO: Should this theme webform_calculator_formula_display be declared in hook_theme()?
   return theme('webform_display_number', $variables);
 }
 
@@ -104,11 +105,11 @@ function _webform_render_formula($component, $value = NULL, $filter = TRUE) {
   // Adding module JS file.
   $element['#attached']['js'][] = array(
     'type' => 'file',
-    'data' => drupal_get_path('module', 'webform_calculator') . '/webform_calculator.js',
+    'data' => backdrop_get_path('module', 'webform_calculator') . '/webform_calculator.js',
   );
   $element['#attached']['js'][] = array(
     'type' => 'file',
-    'data' => drupal_get_path('module', 'webform_calculator') . '/parser.js',
+    'data' => backdrop_get_path('module', 'webform_calculator') . '/parser.js',
   );
 
   return $element;
@@ -215,7 +216,12 @@ function _webform_edit_formula($component) {
     '#type' => 'select',
     '#title' => t('Thousands separator'),
     '#default_value' => $component['extra']['separator'],
-    '#options' => array(',' => t('Comma (,)'), '.' => t('Period (.)'), ' ' => t('Space ( )'), '' => t('None')),
+    '#options' => array(
+      ',' => t('Comma (,)'),
+      '.' => t('Period (.)'),
+      ' ' => t('Space ( )'),
+      '' => t('None'),
+    ),
     '#parents' => array('extra', 'separator'),
   );
 
@@ -223,7 +229,10 @@ function _webform_edit_formula($component) {
     '#type' => 'select',
     '#title' => t('Decimal point'),
     '#default_value' => $component['extra']['point'],
-    '#options' => array(',' => t('Comma (,)'), '.' => t('Period (.)')),
+    '#options' => array(
+      ',' => t('Comma (,)'),
+      '.' => t('Period (.)'),
+    ),
     '#parents' => array('extra', 'point'),
     '#element_validate' => array('_webform_edit_separator_point_validate'),
   );
@@ -260,9 +269,9 @@ function _webform_edit_formula_validate($element, &$element_state) {
   $formula = $element['#value'];
 
   // Verify that the value is not longer than 1028 characters.
-  if (drupal_strlen($formula) > 1028) {
-    form_error($element, t('!name cannot be longer than %max characters but is currently %length characters long.', 
-      array('!name' => $element['#title'], '%max' => 1028, '%length' => drupal_strlen($formula))));
+  if (backdrop_strlen($formula) > 1028) {
+    form_error($element, t('!name cannot be longer than %max characters but is currently %length characters long.',
+      array('!name' => $element['#title'], '%max' => 1028, '%length' => backdrop_strlen($formula))));
   }
 
   // Replace elements in {}.
