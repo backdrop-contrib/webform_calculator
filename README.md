@@ -1,13 +1,13 @@
 # Webform Calculator
 
-Provides a formula webform component for computed values, where you can enter a
-mathematical calculation based on the other fields. E.g., create a formula field
-with value `formkey1 * 0.1 * formkey2`.
+Provides a `formula` webform component for computed values. You can enter a
+mathematical calculation based on the other fields on the webform. For example,
+you could create a formula field with the value `formkey1 * 0.1 * formkey2`.
 
 ## Features
 
- – Creates new component type that calculates values of other components while
-    you are typing and saves the result to the database.
+ - Creates new component type that calculates values of other components while
+   you are typing and saves the result to the database.
  - Supports component types: number, textfield, checkboxes, radios, select.
  - Available operators for formula value: `+`, `-`, `*`, `/`, `(`, `)`, `%`
 
@@ -19,7 +19,7 @@ with value `formkey1 * 0.1 * formkey2`.
 - Install this module using the official Backdrop CMS instructions at
   https://backdropcms.org/guide/modules
 - Create a webform.
-- Add webform fields of type `text field` or `number`.
+- Add webform field(s) of number, textfield, checkboxes, radios, or select type.
 - Create a formula webform field and add a formula that uses the fields added
   earlier.
 - View this webform and fill newly added fields. The formula field should 
