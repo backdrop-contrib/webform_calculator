@@ -2,8 +2,6 @@ name = Webform Calculator
 description = Provides a formula webform component, where you can enter a mathematical calculation based on the other fields.
 backdrop = 1.x
 type = module
-php = 5.2.4
 package = Webform
 
-dependencies[] = token
 dependencies[] = webform (>=4.x)
