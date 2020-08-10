@@ -3,6 +3,16 @@
 define('WEBFORM_CALCULATOR_REGEX', '/\{\w+\}/');
 
 /**
+ * Implements hook_autoload_info().
+ */
+function webform_calculator_autoload_info() {
+  return array(
+    'WebformEvalMath' => 'matheval.class.php',
+    'WebformEvalMathStack' => 'matheval.class.php',
+  );
+}
+
+/**
  * Implements hook_webform_component_info().
  */
 function webform_calculator_webform_component_info() {
@@ -116,10 +126,17 @@ function webform_calculator_replace_formula_values($formula_component, $webform_
   foreach ($components_from_formula as $component_key) {
     if (isset($components_by_key[$component_key])) {
       $component = $components_by_key[$component_key];
-      $values = $submission->data[$component['cid']];
+      $values = empty($submission->data[$component['cid']]) ? array() : (array) $submission->data[$component['cid']];
       $sum = 0;
       foreach ($values as $value) {
-        $sum += $value;
+        if (!empty($value)) {
+          if (is_array($value)) {
+            $sum += array_shift($value);
+          }
+          else {
+            $sum += $value;
+          }
+        }
       }
       $formula = str_replace('{' . $component_key . '}', '(' . $sum . ')', $formula);
     }
@@ -179,12 +196,95 @@ function webform_calculator_form_builder_preview_alter(&$element, $form_type, $f
 }
 
 /**
- * Implements hook_autoload_info().
+ * Implements hook_form_alter().
  */
-function webform_calculator_autoload_info() {
-  return array(
-    'WebformEvalMath' => 'matheval.class.php',
-    'WebformEvalMathStack' => 'matheval.class.php',
+function webform_calculator_form_alter(&$form, &$form_state, $form_id) {
+
+  // Only interested in webforms.
+  if (empty($form_state['webform'])) {
+    return;
+  }
+  
+  // Only interested in webforms with formula components.
+  $has_formula = false;
+  foreach ($form_state['webform']['component_tree']['children'] as $cid => $component) {
+    if ($component['type'] == 'formula') {
+      $has_formula = true;
+      break;
+    }
+  }
+  if (!$has_formula) {
+    return;
+  }
+
+  // Make submitted values, which might be from previous pages, available to the js calculator.
+  $webform_calculator_data = array();
+  if (!empty($form_state['storage']['submitted'])) {
+    foreach ($form_state['webform']['component_tree']['children'] as $cid => $component) {
+      // Numeric keys.
+      if (!empty($form_state['storage']['submitted'][$cid])) {
+        $webform_calculator_data[$component['form_key']] =  $form_state['storage']['submitted'][$cid];
+      }
+      // Named keys.
+      if (!empty($form_state['storage']['submitted'][$component['form_key']])) { 
+        $webform_calculator_data[$component['form_key']] =  $form_state['storage']['submitted'][$component['form_key']];
+      }
+    }
+  }
+  $form['#attached']['js'][] = array(
+    'type' => 'setting',
+    'data' => array(
+      'webformCalculatorData' => $webform_calculator_data,
+    ),
   );
+
+  // Calculate formulas on both validate and submit.
+  $form['#validate'][] = 'webform_calculator_form_calculate';
+  $form['#submit'][] = 'webform_calculator_form_calculate';
 }
 
+/**
+ * Form validation and submit callback.
+ */
+function webform_calculator_form_calculate($form, &$form_state) {
+  if (empty($form_state['storage']['submitted'])) {
+    return;
+  }
+
+  // Make a "node" for webform_calculator_replace_formula_values().
+  $node = new stdClass;
+  $node->webform = array('components' => $form_state['webform']['component_tree']['children']); 
+
+  // Make a webform "submission" for webform_calculator_replace_formula_values().
+  $submission = new stdClass;
+  $submission->data = $form_state['storage']['submitted'];
+
+  // Also add current page submitted values - these are stored in $form_state['values']['submitted'].
+  foreach ($form_state['values']['submitted'] as $key => $submitted) {
+    foreach ($form_state['webform']['component_tree']['children'] as $child) {
+      if ($child['form_key'] == $key) {
+        $submission->data[$child['cid']] = array(0 => $submitted);
+      }
+    }
+  }
+
+  // Run the calculation twice.
+  webform_calculator_form_replace_formula_values($node, $submission, $form_state);
+  webform_calculator_form_replace_formula_values($node, $submission, $form_state);
+}
+
+/**
+ * Wrapper to run webform_calculator_replace_formula_values() during form processing.
+ */
+function webform_calculator_form_replace_formula_values($node, $submission, &$form_state) {
+  foreach ($node->webform['components'] as $component) {
+    if ($component['type'] == 'formula') {
+
+      // Update both 'form_key' and 'cid' submit values.
+      $form_state['values']['submitted'][$component['form_key']] =
+        webform_calculator_replace_formula_values($component, $node, $submission);
+      $form_state['values']['submitted'][$component['cid']] =
+        webform_calculator_replace_formula_values($component, $node, $submission);
+    }
+  }
+}

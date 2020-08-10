@@ -95,6 +95,12 @@
             ).get();
         }
       }
+
+      // Get value from previous page submission.
+      if (componentValue === null && Backdrop.settings.webformCalculatorData !== undefined && componentKey in Backdrop.settings.webformCalculatorData) {
+        componentValue = Backdrop.settings.webformCalculatorData[componentKey]; 
+      }
+
       // Care for array
       if (componentValue instanceof Array) {
         // Convert to number if possible
