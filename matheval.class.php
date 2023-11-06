@@ -215,9 +215,9 @@ class WebformEvalMath {
                     else $output[] = $o2;
                 }
                 
-                // apply in case php version >= 8.1: explicite a null coalescing operator when stack->last(2) is null
+                // apply in case php version >= 8.1.0: apply a null coalescing operator if stack->last(2) does not exist or is null
                 $stacklast2 = $stack->last(2);
-                if (substr(phpversion(),0,3) >= "8.1") {
+                if (version_compare(PHP_VERSION, '8.1.0') >= 0) {                
                     $stacklast2 = $stack->last(2) ?? '';
                 }
 
