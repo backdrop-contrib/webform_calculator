@@ -214,7 +214,7 @@ class WebformEvalMath {
                     if (is_null($o2)) return $this->trigger("unexpected ')'");
                     else $output[] = $o2;
                 }
-                $stacklast2 = $stack->last(2) ? $stack->last(2) : '';
+                $stacklast2 = !empty($stack->last(2)) ? $stack->last(2) : '';
                 if (preg_match("/^([a-z]\w*)\($/", $stacklast2, $matches)) { // did we just close a function?
                     $fnn = $matches[1]; // get the function name
                     $arg_count = $stack->pop(); // see how many arguments there were (cleverly stored on the stack, thank you)
